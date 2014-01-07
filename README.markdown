@@ -1,12 +1,12 @@
 # Moe
 
-TODO: Write a gem description
+A toolkit for using DynamoDB at scale
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'moe'
+    gem "moe"
 
 And then execute:
 
