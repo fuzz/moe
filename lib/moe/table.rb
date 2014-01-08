@@ -10,6 +10,10 @@ module Moe
         table.table_description
       end
 
+      def find(name)
+        Aws.dynamodb.describe_table table_name: name rescue nil
+      end
+
       def template(name, hash_key, range_key, read_capacity, write_capacity)
         { table_name: name,
           key_schema: [
