@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/fuzz/moe.png?branch=master)](https://travis-ci.org/fuzz/moe)
+[![Code Climate](https://codeclimate.com/github/fuzz/moe.png)](https://codeclimate.com/github/fuzz/moe)
+
 # Moe
 
 A toolkit for using DynamoDB at scale
