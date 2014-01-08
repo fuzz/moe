@@ -41,7 +41,11 @@ task :spec do |t|
     end
   end
 
-  Rake::Task["spec"].invoke
+  # Clean out old data
+  Rake::Task["dbdrop"].invoke
+
+  # Run specs
+  Rake::Task["rspec"].invoke
 end
 
 spec_tasks = Dir["spec/*/"].map { |d| File.basename(d) }
