@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/fuzz/moe.png?branch=master)](https://travis-ci.org/fuzz/moe)
 [![Code Climate](https://codeclimate.com/github/fuzz/moe.png)](https://codeclimate.com/github/fuzz/moe)
+[![Coverage Status](https://coveralls.io/repos/fuzz/moe/badge.png)](https://coveralls.io/r/fuzz/moe)
 
 # Moe
 
