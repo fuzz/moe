@@ -15,11 +15,11 @@ describe Moe::TableManager do
 
   describe "#create" do
     it "creates a table for a given model" do
-      manager.create(model: "testmodel")
+      manager.create(model: "create_test")
 
       expect(
-        Moe::Table.find(manager.table_name "testmodel").table.table_name
-      ).to match("testmodel")
+        Moe::Table.find(manager.table_name "create_test").table.table_name
+      ).to match("create_test")
     end
 
     it "munges model names into a DynamoDB-approved format" do
@@ -28,6 +28,34 @@ describe Moe::TableManager do
       expect(
         Moe::Table.find(manager.table_name "testy_model").table.table_name
       ).to match("testy_model")
+    end
+  end
+
+  describe "#increment" do
+    it "increments the table" do
+      manager.create(model: "increment_test")
+
+      Timecop.freeze(Date.today + 30) do
+        frozen_manager = Moe::TableManager.new
+
+        frozen_manager.increment "increment_test"
+      end
+    end
+
+    it "pitches a fit if you run it twice on the same day" do
+      manager.create(model: "fit_test")
+
+      expect { manager.increment "fit_test" }.to raise_error
+    end
+  end
+
+  describe "#load_metadata" do
+    it "loads metadata for a model" do
+      manager.update_metadata(model: "load_metadata_test")
+
+      expect(
+        manager.load_metadata("load_metadata_test").item["write_table"]["s"]
+      ).to eq(manager.table_name "load_metadata_test")
     end
   end
 
