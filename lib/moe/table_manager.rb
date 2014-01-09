@@ -1,5 +1,5 @@
 module Moe
-  class Meta
+  class TableManager
     attr_accessor :table
 
     def initialize
@@ -7,7 +7,7 @@ module Moe
     end
 
     def table_name
-      "#{ENV['RAILS_ENV']}meta"
+      "#{ENV['RAILS_ENV']}manager"
     end
 
   end
