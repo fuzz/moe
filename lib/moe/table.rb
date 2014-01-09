@@ -2,6 +2,18 @@ module Moe
   module Table
 
     module ModuleFunctions
+      def get_item(table_name: "", key: {})
+        dynamo = Aws.dynamodb
+
+        dynamo.get_item table_name: table_name, key: key
+      end
+
+      def put_item(table_name: "", item: {})
+        dynamo = Aws.dynamodb
+
+        dynamo.put_item table_name: table_name, item: item
+      end
+
       def create(name: nil, hash_key: "id", range_key: nil, read_capacity: 5, write_capacity: 10)
         dynamo = Aws.dynamodb
         schema = template(name, hash_key, range_key, read_capacity, write_capacity)
@@ -13,6 +25,8 @@ module Moe
       def find(name)
         Aws.dynamodb.describe_table table_name: name rescue nil
       end
+
+      private
 
       def template(name, hash_key, range_key, read_capacity, write_capacity)
         { table_name: name,

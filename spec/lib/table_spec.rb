@@ -5,6 +5,7 @@ $count = 0
 describe Moe::Table do
   let(:count) { $count += 1 }
   let(:dynamodb) { Aws.dynamodb }
+  let(:item) { { "id" => { s: "test#{count}" } } }
   let(:table) { Moe::Table.create name: "Testy#{count}" }
 
   describe ".create" do
@@ -17,6 +18,17 @@ describe Moe::Table do
     end
   end
 
+  describe ".get_item" do
+    it "gets an item" do
+      dynamodb.put_item table_name: table.table_name, item: item
+      result = Moe::Table.get_item(table_name: table.table_name, key: item)
+
+      expect(
+        result.item["id"]["s"]
+      ).to eq("test#{count}")
+    end
+  end
+
   describe ".find" do
     it "finds a table" do
       Moe::Table.create name: "Testy#{count}"
@@ -26,4 +38,15 @@ describe Moe::Table do
       ).to eq "Testy#{count}"
     end
   end
+
+  describe ".put_item" do
+    it "puts an item" do
+      Moe::Table.put_item table_name: table.table_name, item: item
+
+      expect(
+        dynamodb.get_item(table_name: table.table_name, key: item).item["id"]["s"]
+      ).to eq("test#{count}")
+    end
+  end
+
 end
