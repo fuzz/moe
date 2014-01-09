@@ -1,7 +1,7 @@
 module Moe
-  class Table
+  module Table
 
-    module ClassMethods
+    module ModuleFunctions
       def create(name: nil, hash_key: "id", range_key: nil, read_capacity: 5, write_capacity: 10)
         dynamo = Aws.dynamodb
         schema = template(name, hash_key, range_key, read_capacity, write_capacity)
@@ -33,7 +33,7 @@ module Moe
         }
       end
     end
-    extend ClassMethods
+    extend ModuleFunctions
 
   end
 end
