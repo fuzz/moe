@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "hashie"
 
   spec.add_development_dependency "bundler", "~> 1.3"
+  spec.add_development_dependency "coveralls"
   spec.add_development_dependency "fake_dynamo", "0.2.5"
   spec.add_development_dependency "pry"
   spec.add_development_dependency "rake"

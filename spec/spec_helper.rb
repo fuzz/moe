@@ -1,3 +1,6 @@
+require "coveralls"
+Coveralls.wear!
+
 require "moe"
 require "pry"
 require "timecop"
