@@ -13,17 +13,17 @@ describe Moe::TableManager do
     end
   end
 
-  describe "#create" do
+  describe "#build" do
     it "creates a table for a given model" do
-      manager.create(model: "create_test")
+      manager.build(model: "build_test")
 
       expect(
-        Moe::Table.find(manager.table_name "create_test").table.table_name
-      ).to match("create_test")
+        Moe::Table.find(manager.table_name "build_test").table.table_name
+      ).to match("build_test")
     end
 
     it "munges model names into a DynamoDB-approved format" do
-      manager.create(model: "Testy::Model")
+      manager.build model: "Testy::Model"
 
       expect(
         Moe::Table.find(manager.table_name "testy_model").table.table_name
@@ -33,25 +33,27 @@ describe Moe::TableManager do
 
   describe "#increment" do
     it "increments the table" do
-      manager.create(model: "increment_test")
+      manager.build model: "increment_test"
 
       Timecop.freeze(Date.today + 30) do
         frozen_manager = Moe::TableManager.new
 
-        frozen_manager.increment "increment_test"
+        frozen_manager.increment model: "increment_test"
       end
     end
 
-    it "pitches a fit if you run it twice on the same day" do
-      manager.create(model: "fit_test")
+    it "pitches a fit if run twice on the same day" do
+      manager.build model: "fit_test"
 
-      expect { manager.increment "fit_test" }.to raise_error
+      expect { manager.increment model: "fit_test" }.to raise_error
     end
   end
 
   describe "#load_metadata" do
     it "loads metadata for a model" do
       manager.update_metadata model: "load_metadata_test",
+                              read_capacity: "5",
+                              write_capacity: "10",
                               read_tables: ["load_metadata_test"]
 
       expect(
@@ -94,7 +96,11 @@ describe Moe::TableManager do
 
   describe "#update_metadata" do
     it "updates the metadata" do
-      manager.update_metadata model: "testie", read_tables: ["testie"]
+      manager.update_metadata model: "testie",
+                              read_capacity: "5",
+                              write_capacity: "10",
+                              read_tables: ["testie"]
+
       result = Moe::Table.get_item table_name: manager.meta_table_name,
                                    key: { "id" => { s: "testie" } }
 
