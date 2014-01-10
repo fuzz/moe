@@ -22,7 +22,20 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### JRuby
+Moe requires Ruby 2+ so you will need
+
+```
+export JRUBY_OPTS=--2.0`
+```
+
+to run it.
+
+If you want to run the tests you will need to start fake_dynamo manually and
+
+```
+bundle exec rake rspec  # use rspec instead of spec to bypass auto fake_dynmo
+```
 
 ## Contributing
 
