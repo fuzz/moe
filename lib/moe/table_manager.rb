@@ -20,7 +20,7 @@ module Moe
     def increment(model)
       table_metadata  = load_metadata model
       write_table     = Table.find table_metadata.item["write_table"]["s"]
-      read_capacity   = write_table.table.provisioned_throughput.read_capacity_units.to_s 
+      read_capacity   = write_table.table.provisioned_throughput.read_capacity_units.to_s
       write_capacity  = write_table.table.provisioned_throughput.write_capacity_units.to_s
 
       if write_table.table.table_name.include? date
@@ -51,7 +51,7 @@ module Moe
         "write_capacity" => { s:  write_capacity }
       }
 
-      Table.put_item table_name: meta_table_name, item: item 
+      Table.put_item table_name: meta_table_name, item: item
     end
 
     private
