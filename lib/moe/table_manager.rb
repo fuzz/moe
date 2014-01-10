@@ -8,13 +8,13 @@ module Moe
       @meta = Table.find(meta_table_name) || Table.create(name: meta_table_name)
     end
 
-    def create(model: "", read_capacity: "5", write_capacity: "10")
+    def create(model: "", read_capacity: "5", write_capacity: "10", read_tables: [])
       table = Table.create name: table_name(model)
 
       update_metadata model: model,
                       read_capacity: read_capacity,
                       write_capacity: write_capacity,
-                      read_tables: []
+                      read_tables: read_tables << table_name(model)
     end
 
     def increment(model)
@@ -31,7 +31,8 @@ module Moe
     end
 
     def load_metadata(model)
-      Table.get_item table_name: meta_table_name, key: { "id" => { s: munged_model(model) } }
+      Table.get_item table_name: meta_table_name,
+                     key: { "id" => { s: munged_model(model) } }
     end
 
     def meta_table_name
@@ -45,7 +46,7 @@ module Moe
     def update_metadata(model: "", read_capacity: "5", write_capacity: "10", read_tables: [])
       item = { 
         "id"             => { s:  munged_model(model) },
-        "read_tables"    => { ss: read_tables << table_name(model) },
+        "read_tables"    => { ss: read_tables },
         "write_table"    => { s:  table_name(model) },
         "read_capactity" => { s:  read_capacity },
         "write_capacity" => { s:  write_capacity }

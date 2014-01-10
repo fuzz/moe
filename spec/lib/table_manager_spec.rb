@@ -51,7 +51,8 @@ describe Moe::TableManager do
 
   describe "#load_metadata" do
     it "loads metadata for a model" do
-      manager.update_metadata(model: "load_metadata_test")
+      manager.update_metadata model: "load_metadata_test",
+                              read_tables: ["load_metadata_test"]
 
       expect(
         manager.load_metadata("load_metadata_test").item["write_table"]["s"]
@@ -93,8 +94,9 @@ describe Moe::TableManager do
 
   describe "#update_metadata" do
     it "updates the metadata" do
-      manager.update_metadata(model: "testie")
-      result = Moe::Table.get_item(table_name: manager.meta_table_name, key: { "id" => { s: "testie" } })
+      manager.update_metadata model: "testie", read_tables: ["testie"]
+      result = Moe::Table.get_item table_name: manager.meta_table_name,
+                                   key: { "id" => { s: "testie" } }
 
       expect(
         result.item["write_table"]["s"]
