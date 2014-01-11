@@ -8,15 +8,22 @@ module Moe
       @meta = Table.find(meta_table_name) || Table.create(name: meta_table_name)
     end
 
-    def build(model: "", read_capacity: "5", write_capacity: "10", read_tables: [])
+    def build(model: "", read_capacity: "5", write_capacity: "10", mirror: "false", read_tables: [])
       Table.create name: table_name(model),
                    read_capacity: read_capacity,
                    write_capacity: write_capacity
 
-      update_metadata model: model,
+      if mirror == "true"
+        Table.create name: "#{table_name(model)}_mirror",
+                     read_capacity: read_capacity,
+                     write_capacity: write_capacity
+      end
+
+      update_metadata mirror: mirror,
+                      model: model,
                       read_capacity: read_capacity,
-                      write_capacity: write_capacity,
-                      read_tables: read_tables << table_name(model)
+                      read_tables: read_tables << table_name(model),
+                      write_capacity: write_capacity
     end
 
     def increment(model: "", read_capacity: "", write_capacity: "")
@@ -47,13 +54,14 @@ module Moe
       "moe_#{ENV['RAILS_ENV']}_#{date}_#{munged_model(model)}".downcase
     end
 
-    def update_metadata(model: "", read_capacity: "", write_capacity: "", read_tables: [])
+    def update_metadata(mirror: "", model: "", read_capacity: "", read_tables: [], write_capacity: "")
       item = { 
         "id"             => { s:  munged_model(model) },
-        "read_tables"    => { ss: read_tables },
-        "write_table"    => { s:  table_name(model) },
+        "mirror"         => { s:  mirror },
         "read_capactity" => { s:  read_capacity },
-        "write_capacity" => { s:  write_capacity }
+        "read_tables"    => { ss: read_tables },
+        "write_capacity" => { s:  write_capacity },
+        "write_table"    => { s:  table_name(model) }
       }
 
       Table.put_item table_name: meta_table_name, item: item

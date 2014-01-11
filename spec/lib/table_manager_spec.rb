@@ -15,11 +15,20 @@ describe Moe::TableManager do
 
   describe "#build" do
     it "creates a table for a given model" do
-      manager.build(model: "build_test")
+      manager.build model: "build_test"
 
       expect(
         Moe::Table.find(manager.table_name "build_test").table.table_name
       ).to match("build_test")
+    end
+
+    it "creates a mirror table if requested" do
+      manager.build mirror: "true",
+                    model: "mirror_test"
+
+      expect(
+        Moe::Table.find("#{manager.table_name('mirror_test')}_mirror").table.table_name
+      ).to match("mirror_test_mirror")
     end
 
     it "munges model names into a DynamoDB-approved format" do
@@ -51,7 +60,8 @@ describe Moe::TableManager do
 
   describe "#load_metadata" do
     it "loads metadata for a model" do
-      manager.update_metadata model: "load_metadata_test",
+      manager.update_metadata mirror: "false",
+                              model: "load_metadata_test",
                               read_capacity: "5",
                               write_capacity: "10",
                               read_tables: ["load_metadata_test"]
@@ -96,10 +106,11 @@ describe Moe::TableManager do
 
   describe "#update_metadata" do
     it "updates the metadata" do
-      manager.update_metadata model: "testie",
+      manager.update_metadata mirror: "false",
+                              model: "testie",
                               read_capacity: "5",
-                              write_capacity: "10",
-                              read_tables: ["testie"]
+                              read_tables: ["testie"], 
+                              write_capacity: "10"
 
       result = Moe::Table.get_item table_name: manager.meta_table_name,
                                    key: { "id" => { s: "testie" } }
