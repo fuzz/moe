@@ -31,6 +31,16 @@ describe Moe::TableManager do
       ).to match("mirror_test_mirror")
     end
 
+    it "does not create a mirror table if not requested" do
+      manager.build mirror: "false",
+                    model: "false_mirror_test"
+
+
+      expect(
+        Moe::Table.find("#{manager.table_name('false_mirror_test')}_mirror")
+      ).to be_nil
+    end
+
     it "munges model names into a DynamoDB-approved format" do
       manager.build model: "Testy::Model"
 
@@ -109,7 +119,7 @@ describe Moe::TableManager do
       manager.update_metadata mirror: "false",
                               model: "testie",
                               read_capacity: "5",
-                              read_tables: ["testie"], 
+                              read_tables: ["testie"],
                               write_capacity: "10"
 
       result = Moe::Table.get_item table_name: manager.meta_table_name,
