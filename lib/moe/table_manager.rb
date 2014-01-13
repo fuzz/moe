@@ -5,28 +5,24 @@ module Moe
 
     def initialize
       @date = Time.now.strftime("%F") 
-      @meta = Table.find(meta_table_name) || Table.create(name: meta_table_name)
+      @meta = Table.find(meta_table_name) || Table.create(meta_table_name)
     end
 
-    def build(model: "", read_capacity: "5", write_capacity: "10", mirror: "false", read_tables: [])
-      Table.create name: table_name(model),
-                   read_capacity: read_capacity,
-                   write_capacity: write_capacity
+    def build(model, mirror="false", read_capacity="5", write_capacity="10", read_tables=[])
+      Table.create table_name(model), read_capacity, write_capacity
 
       if mirror == "true"
-        Table.create name: "#{table_name(model)}_mirror",
-                     read_capacity: read_capacity,
-                     write_capacity: write_capacity
+        Table.create "#{table_name(model)}_mirror", read_capacity, write_capacity
       end
 
-      update_metadata mirror: mirror,
-                      model: model,
-                      read_capacity: read_capacity,
-                      read_tables: read_tables << table_name(model),
-                      write_capacity: write_capacity
+      update_metadata model,
+                      mirror,
+                      read_capacity,
+                      read_tables << table_name(model),
+                      write_capacity
     end
 
-    def increment(model: "", read_capacity: "", write_capacity: "")
+    def increment(model)
       table_metadata  = load_metadata model
       write_table     = Table.find table_metadata.item["write_table"]["s"]
       read_capacity   = write_table.table.provisioned_throughput.read_capacity_units.to_s
@@ -36,14 +32,12 @@ module Moe
         raise "Moe sez: Cannot increment twice on the same day!"
       end
 
-      build model: model,
-            read_capacity: read_capacity,
-            write_capacity: write_capacity
+      build model, read_capacity, write_capacity
     end
 
     def load_metadata(model)
-      Table.get_item table_name: meta_table_name,
-                     key: { "id" => { s: munged_model(model) } }
+      Table.get_item meta_table_name,
+                     { "id" => { s: munged_model(model) } }
     end
 
     def meta_table_name
@@ -54,7 +48,7 @@ module Moe
       "moe_#{ENV['RAILS_ENV']}_#{date}_#{munged_model(model)}".downcase
     end
 
-    def update_metadata(mirror: "", model: "", read_capacity: "", read_tables: [], write_capacity: "")
+    def update_metadata(model, mirror, read_capacity, read_tables, write_capacity)
       item = { 
         "id"             => { s:  munged_model(model) },
         "mirror"         => { s:  mirror },
@@ -64,7 +58,7 @@ module Moe
         "write_table"    => { s:  table_name(model) }
       }
 
-      Table.put_item table_name: meta_table_name, item: item
+      Table.put_item meta_table_name, item
     end
 
     private

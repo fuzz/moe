@@ -15,7 +15,7 @@ describe Moe::TableManager do
 
   describe "#build" do
     it "creates a table for a given model" do
-      manager.build model: "build_test"
+      manager.build "build_test"
 
       expect(
         Moe::Table.find(manager.table_name "build_test").table.table_name
@@ -23,8 +23,7 @@ describe Moe::TableManager do
     end
 
     it "creates a mirror table if requested" do
-      manager.build mirror: "true",
-                    model: "mirror_test"
+      manager.build "mirror_test", "true"
 
       expect(
         Moe::Table.find("#{manager.table_name('mirror_test')}_mirror").table.table_name
@@ -32,9 +31,7 @@ describe Moe::TableManager do
     end
 
     it "does not create a mirror table if not requested" do
-      manager.build mirror: "false",
-                    model: "false_mirror_test"
-
+      manager.build "false_mirror_test"
 
       expect(
         Moe::Table.find("#{manager.table_name('false_mirror_test')}_mirror")
@@ -42,7 +39,7 @@ describe Moe::TableManager do
     end
 
     it "munges model names into a DynamoDB-approved format" do
-      manager.build model: "Testy::Model"
+      manager.build "Testy::Model"
 
       expect(
         Moe::Table.find(manager.table_name "testy_model").table.table_name
@@ -52,29 +49,29 @@ describe Moe::TableManager do
 
   describe "#increment" do
     it "increments the table" do
-      manager.build model: "increment_test"
+      manager.build "increment_test"
 
       Timecop.freeze(Date.today + 30) do
         frozen_manager = Moe::TableManager.new
 
-        frozen_manager.increment model: "increment_test"
+        frozen_manager.increment "increment_test"
       end
     end
 
     it "pitches a fit if run twice on the same day" do
-      manager.build model: "fit_test"
+      manager.build "fit_test"
 
-      expect { manager.increment model: "fit_test" }.to raise_error
+      expect { manager.increment "fit_test" }.to raise_error
     end
   end
 
   describe "#load_metadata" do
     it "loads metadata for a model" do
-      manager.update_metadata mirror: "false",
-                              model: "load_metadata_test",
-                              read_capacity: "5",
-                              write_capacity: "10",
-                              read_tables: ["load_metadata_test"]
+      manager.update_metadata "load_metadata_test",
+                              "false",
+                              "5",
+                              ["load_metadata_test"],
+                              "10"
 
       expect(
         manager.load_metadata("load_metadata_test").item["write_table"]["s"]
@@ -116,14 +113,14 @@ describe Moe::TableManager do
 
   describe "#update_metadata" do
     it "updates the metadata" do
-      manager.update_metadata mirror: "false",
-                              model: "testie",
-                              read_capacity: "5",
-                              read_tables: ["testie"],
-                              write_capacity: "10"
+      manager.update_metadata "testie",
+                              "false",
+                              "5",
+                              ["testie"],
+                              "10"
 
-      result = Moe::Table.get_item table_name: manager.meta_table_name,
-                                   key: { "id" => { s: "testie" } }
+      result = Moe::Table.get_item manager.meta_table_name,
+                                   { "id" => { s: "testie" } }
 
       expect(
         result.item["write_table"]["s"]

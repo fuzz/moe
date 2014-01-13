@@ -2,21 +2,21 @@ module Moe
   module Table
 
     module ModuleFunctions
-      def get_item(table_name: "", key: {})
+      def get_item(table_name, key)
         dynamo = Aws.dynamodb
 
         dynamo.get_item table_name: table_name, key: key
       end
 
-      def put_item(table_name: "", item: {})
+      def put_item(table_name, item)
         dynamo = Aws.dynamodb
 
         dynamo.put_item table_name: table_name, item: item
       end
 
-      def create(name: nil, hash_key: "id", range_key: nil, read_capacity: 5, write_capacity: 10)
+      def create(name, hash_key="id", read_capacity="5", write_capacity="10")
         dynamo = Aws.dynamodb
-        schema = template(name, hash_key, range_key, read_capacity, write_capacity)
+        schema = template(name, hash_key, read_capacity, write_capacity)
 
         table = dynamo.create_table schema
         table.table_description
@@ -28,7 +28,7 @@ module Moe
 
       private
 
-      def template(name, hash_key, range_key, read_capacity, write_capacity)
+      def template(name, hash_key, read_capacity, write_capacity)
         { table_name: name,
           key_schema: [
             attribute_name: hash_key,
