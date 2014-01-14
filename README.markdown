@@ -57,19 +57,9 @@ number of partitioning strategies and instrumentation so you can compare your
 actual overall throughput to what AWS reports in order to determine the
 effectiveness of and tune your key randomization strategy.
 
-## Installation
+## JRuby
 
-### JRuby
-
-Moe requires Ruby 2+ so you will need
-
-```
-export JRUBY_OPTS=--2.0
-```
-
-to run it.
-
-If you want to run the tests you will need to start fake_dynamo manually and
+To run the tests you will need to start fake_dynamo manually and
 
 ```
 bundle exec rake rspec  # use rspec instead of spec to bypass auto fake_dynamo
