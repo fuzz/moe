@@ -18,16 +18,16 @@ describe Moe::TableManager do
       manager.build "build_test"
 
       expect(
-        Moe::Table.find(manager.table_name "build_test").table.table_name
+        Moe::Table.find(manager.table_name "build_test_1").table.table_name
       ).to match("build_test")
     end
 
     it "creates a mirror table if requested" do
-      manager.build "mirror_test", "true"
+      manager.build "mirror_test", 2
 
       expect(
-        Moe::Table.find("#{manager.table_name('mirror_test')}_mirror").table.table_name
-      ).to match("mirror_test_mirror")
+        Moe::Table.find("#{manager.table_name('mirror_test')}_2").table.table_name
+      ).to match("mirror_test_2")
     end
 
     it "does not create a mirror table if not requested" do
@@ -42,7 +42,7 @@ describe Moe::TableManager do
       manager.build "Testy::Model"
 
       expect(
-        Moe::Table.find(manager.table_name "testy_model").table.table_name
+        Moe::Table.find(manager.table_name "testy_model_1").table.table_name
       ).to match("testy_model")
     end
   end
@@ -68,14 +68,14 @@ describe Moe::TableManager do
   describe "#load_metadata" do
     it "loads metadata for a model" do
       manager.update_metadata "load_metadata_test",
-                              "false",
-                              "5",
                               ["load_metadata_test"],
+                              ["load_metadata_test"],
+                              "5",
                               "10"
 
       expect(
-        manager.load_metadata("load_metadata_test").item["write_table"]["s"]
-      ).to eq(manager.table_name "load_metadata_test")
+        manager.load_metadata("load_metadata_test").item["write_tables"]["ss"].first
+      ).to match("load_metadata_test")
     end
   end
 
@@ -114,16 +114,16 @@ describe Moe::TableManager do
   describe "#update_metadata" do
     it "updates the metadata" do
       manager.update_metadata "testie",
-                              "false",
-                              "5",
                               ["testie"],
+                              ["testie"],
+                              "5",
                               "10"
 
       result = Moe::Table.get_item manager.meta_table_name,
                                    { "id" => { s: "testie" } }
 
       expect(
-        result.item["write_table"]["s"]
+        result.item["write_tables"]["ss"].first
       ).to match("testie")
     end
   end

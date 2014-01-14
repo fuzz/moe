@@ -8,23 +8,26 @@ module Moe
       @meta = Table.find(meta_table_name) || Table.create(meta_table_name)
     end
 
-    def build(model, mirror="false", read_capacity="5", write_capacity="10", read_tables=[])
-      Table.create table_name(model), read_capacity, write_capacity
+    def build(model, copies=1, read_tables=[], read_capacity="5", write_capacity="10")
+      write_tables = []
 
-      if mirror == "true"
-        Table.create "#{table_name(model)}_mirror", read_capacity, write_capacity
+      1.upto(copies).each do |copy|
+        Table.create "#{table_name(model)}_#{copy}", read_capacity, write_capacity
+        write_tables << "#{table_name(model)}_#{copy}"
       end
 
       update_metadata model,
-                      mirror,
+                      read_tables << write_tables.first,
+                      write_tables,
                       read_capacity,
-                      read_tables << table_name(model),
                       write_capacity
+
     end
 
     def increment(model)
       table_metadata  = load_metadata model
-      write_table     = Table.find table_metadata.item["write_table"]["s"]
+      read_tables     = table_metadata.item["read_tables"]["ss"]
+      write_table     = Table.find table_metadata.item["write_tables"]["ss"].first
       read_capacity   = write_table.table.provisioned_throughput.read_capacity_units.to_s
       write_capacity  = write_table.table.provisioned_throughput.write_capacity_units.to_s
 
@@ -32,7 +35,7 @@ module Moe
         raise "Moe sez: Cannot increment twice on the same day!"
       end
 
-      build model, read_capacity, write_capacity
+      build model, table_metadata.item["write_tables"]["ss"].size, read_tables, read_capacity, write_capacity
     end
 
     def load_metadata(model)
@@ -48,14 +51,13 @@ module Moe
       "moe_#{ENV['RAILS_ENV']}_#{date}_#{munged_model(model)}".downcase
     end
 
-    def update_metadata(model, mirror, read_capacity, read_tables, write_capacity)
+    def update_metadata(model, read_tables=[], write_tables=[], read_capacity, write_capacity)
       item = { 
         "id"             => { s:  munged_model(model) },
-        "mirror"         => { s:  mirror },
-        "read_capactity" => { s:  read_capacity },
         "read_tables"    => { ss: read_tables },
+        "write_tables"   => { ss: write_tables },
+        "read_capactity" => { s:  read_capacity },
         "write_capacity" => { s:  write_capacity },
-        "write_table"    => { s:  table_name(model) }
       }
 
       Table.put_item meta_table_name, item
