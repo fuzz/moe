@@ -8,10 +8,12 @@ module Moe
         dynamo.get_item table_name: table_name, key: key
       end
 
-      def put_item(table_name, item)
+      def put_item(write_tables, item)
         dynamo = Aws.dynamodb
 
-        dynamo.put_item table_name: table_name, item: item
+        write_tables.each do |table_name|
+          dynamo.put_item table_name: table_name, item: item
+        end
       end
 
       def create(name, hash_key="id", read_capacity="5", write_capacity="10")

@@ -41,12 +41,20 @@ describe Moe::Table do
 
   describe ".put_item" do
     it "puts an item" do
-      Moe::Table.put_item table.table_name, item
+      Moe::Table.put_item [table.table_name], item
 
       expect(
         dynamodb.get_item(table_name: table.table_name, key: item).item["id"]["s"]
       ).to eq("test#{count}")
     end
-  end
 
+    it "puts an item to multiple tables" do
+      mirror_table = Moe::Table.create "Testy#{count}_2"
+      Moe::Table.put_item [table.table_name, mirror_table.table_name], item
+
+      expect(
+        dynamodb.get_item(table_name: table.table_name, key: item).item["id"]["s"]
+      ).to eq(dynamodb.get_item(table_name: mirror_table.table_name, key: item).item["id"]["s"])
+    end
+  end
 end

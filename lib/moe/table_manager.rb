@@ -60,7 +60,7 @@ module Moe
         "write_capacity" => { s:  write_capacity },
       }
 
-      Table.put_item meta_table_name, item
+      Table.put_item [meta_table_name], item
     end
 
     private
