@@ -72,9 +72,8 @@ describe Moe::TableManager do
                               ["load_metadata_test"],
                               "5",
                               "10"
-
       expect(
-        manager.load_metadata("load_metadata_test").item["write_tables"]["ss"].first
+        manager.load_metadata("load_metadata_test")["write_tables"]["ss"].first
       ).to match("load_metadata_test")
     end
   end
@@ -119,11 +118,11 @@ describe Moe::TableManager do
                               "5",
                               "10"
 
-      result = Moe::Table.get_item manager.meta_table_name,
+      result = Moe::Table.get_item [manager.meta_table_name],
                                    { "id" => { s: "testie" } }
 
       expect(
-        result.item["write_tables"]["ss"].first
+        result["write_tables"]["ss"].first
       ).to match("testie")
     end
   end

@@ -21,10 +21,20 @@ describe Moe::Table do
   describe ".get_item" do
     it "gets an item" do
       dynamodb.put_item table_name: table.table_name, item: item
-      result = Moe::Table.get_item table.table_name, item
+      result = Moe::Table.get_item [table.table_name], item
 
       expect(
-        result.item["id"]["s"]
+        result["id"]["s"]
+      ).to eq("test#{count}")
+    end
+
+    it "gets an item across multiple tables" do
+      dynamodb.put_item table_name: table.table_name, item: item
+      empty_table = Moe::Table.create "Testy#{count}_empty"
+      result      = Moe::Table.get_item [table.table_name, empty_table.table_name], item
+
+      expect(
+        result["id"]["s"]
       ).to eq("test#{count}")
     end
   end

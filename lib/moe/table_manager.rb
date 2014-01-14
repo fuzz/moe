@@ -26,8 +26,8 @@ module Moe
 
     def increment(model)
       table_metadata  = load_metadata model
-      read_tables     = table_metadata.item["read_tables"]["ss"]
-      write_table     = Table.find table_metadata.item["write_tables"]["ss"].first
+      read_tables     = table_metadata["read_tables"]["ss"]
+      write_table     = Table.find table_metadata["write_tables"]["ss"].first
       read_capacity   = write_table.table.provisioned_throughput.read_capacity_units.to_s
       write_capacity  = write_table.table.provisioned_throughput.write_capacity_units.to_s
 
@@ -35,11 +35,11 @@ module Moe
         raise "Moe sez: Cannot increment twice on the same day!"
       end
 
-      build model, table_metadata.item["write_tables"]["ss"].size, read_tables, read_capacity, write_capacity
+      build model, table_metadata["write_tables"]["ss"].size, read_tables, read_capacity, write_capacity
     end
 
     def load_metadata(model)
-      Table.get_item meta_table_name,
+      Table.get_item [meta_table_name],
                      { "id" => { s: munged_model(model) } }
     end
 

@@ -2,10 +2,14 @@ module Moe
   module Table
 
     module ModuleFunctions
-      def get_item(table_name, key)
+      def get_item(read_tables, key)
         dynamo = Aws.dynamodb
 
-        dynamo.get_item table_name: table_name, key: key
+        item = nil
+        while !item
+          item = dynamo.get_item(table_name: read_tables.pop, key: key).item
+        end
+        item
       end
 
       def put_item(write_tables, item)
