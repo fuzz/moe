@@ -6,14 +6,15 @@ describe Moe::Table do
   let(:count) { $count += 1 }
   let(:dynamodb) { Aws.dynamodb }
   let(:item) { { "id" => { s: "test#{count}" } } }
-  let(:table) { Moe::Table.create "Testy#{count}" }
+  let(:created_tables) { Moe::Table.create("Testy#{count}") }
+  let(:table) { Moe::Table.find(created_tables.first).table }
 
   describe ".create" do
     it "creates a new table" do
       new_table = Moe::Table.create "Testy#{count}"
 
       expect(
-        dynamodb.list_tables.table_names.include? "Testy#{count}"
+        dynamodb.list_tables.table_names.include? "Testy#{count}_1"
       ).to be_true
     end
   end
@@ -31,7 +32,7 @@ describe Moe::Table do
     it "gets an item across multiple tables" do
       dynamodb.put_item table_name: table.table_name, item: item
       empty_table = Moe::Table.create "Testy#{count}_empty"
-      result      = Moe::Table.get_item [table.table_name, empty_table.table_name], item
+      result      = Moe::Table.get_item [table.table_name, "Testy#{count}_empty_1"], item
 
       expect(
         result["id"]["s"]
@@ -44,8 +45,8 @@ describe Moe::Table do
       Moe::Table.create "Testy#{count}"
 
       expect(
-        Moe::Table.find("Testy#{count}").table.table_name
-      ).to eq "Testy#{count}"
+        Moe::Table.find("Testy#{count}_1").table.table_name
+      ).to match("Testy#{count}")
     end
   end
 
@@ -59,12 +60,12 @@ describe Moe::Table do
     end
 
     it "puts an item to multiple tables" do
-      mirror_table = Moe::Table.create "Testy#{count}_2"
-      Moe::Table.put_item [table.table_name, mirror_table.table_name], item
+      mirror_tables = Moe::Table.create "Testie#{count}", 2
+      Moe::Table.put_item ["Testie#{count}_1", "Testie#{count}_2"], item
 
       expect(
-        dynamodb.get_item(table_name: table.table_name, key: item).item["id"]["s"]
-      ).to eq(dynamodb.get_item(table_name: mirror_table.table_name, key: item).item["id"]["s"])
+        dynamodb.get_item(table_name: "Testie#{count}_1", key: item).item["id"]["s"]
+      ).to eq(dynamodb.get_item(table_name: "Testie#{count}_2", key: item).item["id"]["s"])
     end
   end
 end

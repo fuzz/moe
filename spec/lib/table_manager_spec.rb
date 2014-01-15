@@ -8,8 +8,8 @@ describe Moe::TableManager do
       new_manager = Moe::TableManager.new
 
       expect(
-        Moe::Table.find(new_manager.meta_table_name).table.table_name
-      ).to eq(new_manager.meta_table_name)
+        Moe::Table.find(new_manager.meta_table_names.first).table.table_name
+      ).to eq(new_manager.meta_table_names.first)
     end
   end
 
@@ -34,7 +34,7 @@ describe Moe::TableManager do
       manager.build "false_mirror_test"
 
       expect(
-        Moe::Table.find("#{manager.table_name('false_mirror_test')}_mirror")
+        Moe::Table.find("#{manager.table_name('false_mirror_test')}_2")
       ).to be_nil
     end
 
@@ -118,7 +118,7 @@ describe Moe::TableManager do
                               "5",
                               "10"
 
-      result = Moe::Table.get_item [manager.meta_table_name],
+      result = Moe::Table.get_item manager.meta_table_names,
                                    { "id" => { s: "testie" } }
 
       expect(

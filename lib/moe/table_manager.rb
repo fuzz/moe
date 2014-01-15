@@ -5,16 +5,11 @@ module Moe
 
     def initialize
       @date = Time.now.strftime("%F") 
-      @meta = Table.find(meta_table_name) || Table.create(meta_table_name)
+      @meta = Table.find(meta_table_names.first) || Table.create(meta_table_name, 2)
     end
 
     def build(model, copies=1, read_tables=[], read_capacity="5", write_capacity="10")
-      write_tables = []
-
-      1.upto(copies).each do |copy|
-        Table.create "#{table_name(model)}_#{copy}", read_capacity, write_capacity
-        write_tables << "#{table_name(model)}_#{copy}"
-      end
+      write_tables = Table.create table_name(model), copies, "id", read_capacity, write_capacity
 
       update_metadata model,
                       read_tables << write_tables.first,
@@ -39,12 +34,16 @@ module Moe
     end
 
     def load_metadata(model)
-      Table.get_item [meta_table_name],
+      Table.get_item meta_table_names,
                      { "id" => { s: munged_model(model) } }
     end
 
     def meta_table_name
       "moe_#{ENV['RAILS_ENV']}_manager"
+    end
+
+    def meta_table_names
+      ["#{meta_table_name}_1", "#{meta_table_name}_2"]
     end
 
     def table_name(model)
@@ -60,7 +59,7 @@ module Moe
         "write_capacity" => { s:  write_capacity },
       }
 
-      Table.put_item [meta_table_name], item
+      Table.put_item meta_table_names, item
     end
 
     private

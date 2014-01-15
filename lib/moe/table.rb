@@ -20,12 +20,17 @@ module Moe
         end
       end
 
-      def create(name, hash_key="id", read_capacity="5", write_capacity="10")
+      def create(name, copies=1, hash_key="id", read_capacity="5", write_capacity="10")
         dynamo = Aws.dynamodb
-        schema = template(name, hash_key, read_capacity, write_capacity)
+        tables = []
 
-        table = dynamo.create_table schema
-        table.table_description
+        1.upto(copies).each do |copy|
+          schema = template("#{name}_#{copy}", hash_key, read_capacity, write_capacity)
+          table  = dynamo.create_table schema
+
+          tables << "#{name}_#{copy}"
+        end
+        tables
       end
 
       def find(name)
