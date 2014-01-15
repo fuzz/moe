@@ -1,15 +1,16 @@
 module Moe
   class TableManager
     attr_reader   :date
-    attr_accessor :meta
+    attr_accessor :dyna, :meta
 
     def initialize
-      @date = Time.now.strftime("%F") 
-      @meta = Table.find(meta_table_names.first) || Table.create(meta_table_name, 2)
+      @date = Time.now.strftime("%F")
+      @dyna = Dyna.new
+      @meta = dyna.find(meta_table_names.first) || dyna.create(meta_table_name, 2)
     end
 
     def build(model, copies=1, read_tables=[], read_capacity="5", write_capacity="10")
-      write_tables = Table.create table_name(model), copies, "id", read_capacity, write_capacity
+      write_tables = dyna.create table_name(model), copies, "id", read_capacity, write_capacity
 
       update_metadata model,
                       read_tables << write_tables.first,
@@ -23,7 +24,7 @@ module Moe
       table_metadata  = load_metadata model
       read_tables     = table_metadata[:read_tables]
       write_tables    = table_metadata[:write_tables]
-      write_table     = Table.find write_tables.first
+      write_table     = dyna.find write_tables.first
       read_capacity   = write_table.table.provisioned_throughput.read_capacity_units.to_s
       write_capacity  = write_table.table.provisioned_throughput.write_capacity_units.to_s
 
@@ -35,7 +36,7 @@ module Moe
     end
 
     def load_metadata(model)
-      metadata = Table.get_item meta_table_names,
+      metadata = dyna.get_item meta_table_names,
                                 { "id" => { s: munged_model(model) } }
 
       {
@@ -65,7 +66,7 @@ module Moe
         "write_capacity" => { s:  write_capacity },
       }
 
-      Table.put_item meta_table_names, item
+      dyna.put_item meta_table_names, item
     end
 
     private

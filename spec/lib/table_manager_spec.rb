@@ -1,6 +1,7 @@
 require "spec_helper"
 
 describe Moe::TableManager do
+  let(:dyna)    { Moe::Dyna.new }
   let(:manager) { Moe::TableManager.new }
 
   describe "#initialize" do
@@ -8,7 +9,7 @@ describe Moe::TableManager do
       new_manager = Moe::TableManager.new
 
       expect(
-        Moe::Table.find(new_manager.meta_table_names.first).table.table_name
+        dyna.find(new_manager.meta_table_names.first).table.table_name
       ).to eq(new_manager.meta_table_names.first)
     end
   end
@@ -18,7 +19,7 @@ describe Moe::TableManager do
       manager.build "build_test"
 
       expect(
-        Moe::Table.find(manager.table_name "build_test_1").table.table_name
+        dyna.find(manager.table_name "build_test_1").table.table_name
       ).to match("build_test")
     end
 
@@ -26,7 +27,7 @@ describe Moe::TableManager do
       manager.build "mirror_test", 2
 
       expect(
-        Moe::Table.find("#{manager.table_name('mirror_test')}_2").table.table_name
+        dyna.find("#{manager.table_name('mirror_test')}_2").table.table_name
       ).to match("mirror_test_2")
     end
 
@@ -34,7 +35,7 @@ describe Moe::TableManager do
       manager.build "false_mirror_test"
 
       expect(
-        Moe::Table.find("#{manager.table_name('false_mirror_test')}_2")
+        dyna.find("#{manager.table_name('false_mirror_test')}_2")
       ).to be_nil
     end
 
@@ -42,7 +43,7 @@ describe Moe::TableManager do
       manager.build "Testy::Model"
 
       expect(
-        Moe::Table.find(manager.table_name "testy_model_1").table.table_name
+        dyna.find(manager.table_name "testy_model_1").table.table_name
       ).to match("testy_model")
     end
   end
@@ -118,7 +119,7 @@ describe Moe::TableManager do
                               "5",
                               "10"
 
-      result = Moe::Table.get_item manager.meta_table_names,
+      result = dyna.get_item manager.meta_table_names,
                                    { "id" => { s: "testie" } }
 
       expect(
