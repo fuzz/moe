@@ -60,6 +60,12 @@ describe Moe::Table do
         Moe::Table.find("Testy#{count}_1").table.table_name
       ).to match("Testy#{count}")
     end
+
+    it "returns nil if it does not find a table" do
+      expect(
+        Moe::Table.find "nope"
+      ).to be_nil
+    end
   end
 
   describe ".put_item" do
