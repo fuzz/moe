@@ -17,6 +17,18 @@ describe Moe::Table do
         dynamodb.list_tables.table_names.include? "Testy#{count}_1"
       ).to be_true
     end
+
+    it "creates as many copies of a table as requested" do
+      new_tables = Moe::Table.create "Testie#{count}", 5
+
+      expect(
+        dynamodb.list_tables.table_names.include? "Testie#{count}_1"
+      ).to be_true
+
+      expect(
+        dynamodb.list_tables.table_names.include? "Testie#{count}_5"
+      ).to be_true
+    end
   end
 
   describe ".get_item" do
