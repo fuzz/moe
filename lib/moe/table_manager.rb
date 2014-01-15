@@ -21,8 +21,9 @@ module Moe
 
     def increment(model)
       table_metadata  = load_metadata model
-      read_tables     = table_metadata["read_tables"]["ss"]
-      write_table     = Table.find table_metadata["write_tables"]["ss"].first
+      read_tables     = table_metadata[:read_tables]
+      write_tables    = table_metadata[:write_tables]
+      write_table     = Table.find write_tables.first
       read_capacity   = write_table.table.provisioned_throughput.read_capacity_units.to_s
       write_capacity  = write_table.table.provisioned_throughput.write_capacity_units.to_s
 
@@ -30,12 +31,17 @@ module Moe
         raise "Moe sez: Cannot increment twice on the same day!"
       end
 
-      build model, table_metadata["write_tables"]["ss"].size, read_tables, read_capacity, write_capacity
+      build model, write_tables.size, read_tables, read_capacity, write_capacity
     end
 
     def load_metadata(model)
-      Table.get_item meta_table_names,
-                     { "id" => { s: munged_model(model) } }
+      metadata = Table.get_item meta_table_names,
+                                { "id" => { s: munged_model(model) } }
+
+      {
+        read_tables:  Serializers::Commafy.load(metadata["read_tables"]["s"]),
+        write_tables: Serializers::Commafy.load(metadata["write_tables"]["s"])
+      }
     end
 
     def meta_table_name
@@ -53,8 +59,8 @@ module Moe
     def update_metadata(model, read_tables=[], write_tables=[], read_capacity, write_capacity)
       item = { 
         "id"             => { s:  munged_model(model) },
-        "read_tables"    => { ss: read_tables },
-        "write_tables"   => { ss: write_tables },
+        "read_tables"    => { s:  Serializers::Commafy.dump(read_tables) },
+        "write_tables"   => { s:  Serializers::Commafy.dump(write_tables) },
         "read_capactity" => { s:  read_capacity },
         "write_capacity" => { s:  write_capacity },
       }
