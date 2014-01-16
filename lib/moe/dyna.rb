@@ -21,7 +21,7 @@ module Moe
       end
     end
 
-    def create(name, copies=1, hash_key="id", read_capacity="5", write_capacity="10")
+    def create(name, copies=1, hash_key="id", read_capacity=5, write_capacity=10)
       tables = []
 
       1.upto(copies).each do |copy|

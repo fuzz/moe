@@ -15,6 +15,10 @@ Aws.config = {
     region: "us-east-1"
   }
 
+Moe.configure do |conf|
+  conf.tables = {}
+end
+
 RSpec.configure do |conf|
   conf.order = "random"
 

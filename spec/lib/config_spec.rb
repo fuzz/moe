@@ -5,22 +5,22 @@ describe Moe::Config do
   describe "config block" do
     it "accepts a configuration block" do
       Moe.configure do |c|
-        c.read_tables = { "foo" => "bar" }
+        c.tables = { "foo" => "bar" }
       end
 
-      expect( Moe.config.read_tables["foo"] ).to eq("bar")
+      expect( Moe.config.tables["foo"] ).to eq("bar")
     end
 
     it "allows configuration changes" do
       Moe.configure do |c|
-        c.read_tables = { "foo" => "bar" }
+        c.tables = { "foo" => "bar" }
       end
 
       Moe.configure do |c|
-        c.read_tables = { "foo" => "star" }
+        c.tables = { "foo" => "star" }
       end
 
-      expect( Moe.config.read_tables["foo"] ).to eq("star") 
+      expect( Moe.config.tables["foo"] ).to eq("star")
     end
   end
 end

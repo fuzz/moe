@@ -11,11 +11,10 @@ module Moe
   extend ModuleFunctions
 
   class Config
-    attr_accessor :read_tables, :write_tables
+    attr_accessor :tables
 
     def initialize
-      @read_tables  = {}
-      @write_tables = {}
+      @tables  = {}
     end
   end
 end

@@ -9,7 +9,7 @@ module Moe
       @meta = dyna.find(meta_table_names.first) || dyna.create(meta_table_name, 2)
     end
 
-    def build(model, copies=1, read_tables=[], read_capacity="5", write_capacity="10")
+    def build(model, copies=1, read_capacity=5, write_capacity=10, read_tables=[])
       write_tables = dyna.create table_name(model), copies, "id", read_capacity, write_capacity
 
       update_metadata model,
@@ -25,14 +25,14 @@ module Moe
       read_tables     = table_metadata[:read_tables]
       write_tables    = table_metadata[:write_tables]
       write_table     = dyna.find write_tables.first
-      read_capacity   = write_table.table.provisioned_throughput.read_capacity_units.to_s
-      write_capacity  = write_table.table.provisioned_throughput.write_capacity_units.to_s
+      read_capacity   = write_table.table.provisioned_throughput.read_capacity_units
+      write_capacity  = write_table.table.provisioned_throughput.write_capacity_units
 
       if write_table.table.table_name.include? date
         raise "Moe sez: Cannot increment twice on the same day!"
       end
 
-      build model, write_tables.size, read_tables, read_capacity, write_capacity
+      build model, write_tables.size, read_capacity, write_capacity, read_tables
     end
 
     def load_metadata(model)
@@ -62,8 +62,8 @@ module Moe
         "id"             => { s:  munged_model(model) },
         "read_tables"    => { s:  Serializers::Commafy.dump(read_tables) },
         "write_tables"   => { s:  Serializers::Commafy.dump(write_tables) },
-        "read_capactity" => { s:  read_capacity },
-        "write_capacity" => { s:  write_capacity },
+        "read_capactity" => { s:  read_capacity.to_s },
+        "write_capacity" => { s:  write_capacity.to_s },
       }
 
       dyna.put_item meta_table_names, item
