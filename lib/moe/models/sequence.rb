@@ -2,6 +2,7 @@ module Moe
   module Models
     class Sequence
       attr_accessor :dyna
+      attr_reader   :read_tables, :write_tables
 
       module ClassMethods
         def setup(name, copies, read_capacity, write_capacity)
@@ -14,7 +15,7 @@ module Moe
       end
       extend ClassMethods
 
-      def initialize(name, copies)
+      def initialize(name)
         @dyna = Dyna.new
         @read_tables, @write_tables = Moe.config.tables[name]
       end
