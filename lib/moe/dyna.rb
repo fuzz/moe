@@ -1,23 +1,23 @@
 module Moe
   class Dyna
 
-    attr_accessor :dynamo
+    attr_accessor :dynamodb
 
     def initialize
-      @dynamo = Aws.dynamodb
+      @dynamodb = Aws.dynamodb
     end
 
     def get_item(read_tables, key)
       item = nil
       while !item
-        item = dynamo.get_item(table_name: read_tables.pop, key: key).item
+        item = dynamodb.get_item(table_name: read_tables.pop, key: key).item
       end
       item
     end
 
     def put_item(write_tables, item)
       write_tables.each do |table_name|
-        dynamo.put_item table_name: table_name, item: item
+        dynamodb.put_item table_name: table_name, item: item
       end
     end
 
@@ -26,7 +26,7 @@ module Moe
 
       1.upto(copies).each do |copy|
         schema = template("#{name}_#{copy}", hash_key, read_capacity, write_capacity)
-        table  = dynamo.create_table schema
+        table  = dynamodb.create_table schema
 
         tables << "#{name}_#{copy}"
       end
@@ -34,8 +34,8 @@ module Moe
     end
 
     def find(name)
-      if dynamo.list_tables.table_names.include? name
-        dynamo.describe_table table_name: name
+      if dynamodb.list_tables.table_names.include? name
+        dynamodb.describe_table table_name: name
       else
         false
       end
