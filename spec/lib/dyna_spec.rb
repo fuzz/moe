@@ -62,10 +62,10 @@ describe Moe::Dyna do
       ).to match("Testy#{count}")
     end
 
-    it "returns nil if it does not find a table" do
+    it "returns false if it does not find a table" do
       expect(
         dyna.find "nope"
-      ).to be_nil
+      ).to be_false
     end
   end
 

@@ -34,7 +34,11 @@ module Moe
     end
 
     def find(name)
-      dynamo.describe_table table_name: name rescue nil
+      if dynamo.list_tables.table_names.include? name
+        dynamo.describe_table table_name: name
+      else
+        false
+      end
     end
 
     private

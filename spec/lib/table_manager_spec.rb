@@ -23,7 +23,7 @@ describe Moe::TableManager do
       ).to match("build_test")
     end
 
-    it "creates a mirror table if requested" do
+    it "creates additional tables if requested" do
       manager.build "mirror_test", 2
 
       expect(
@@ -31,12 +31,12 @@ describe Moe::TableManager do
       ).to match("mirror_test_2")
     end
 
-    it "does not create a mirror table if not requested" do
+    it "does not create additional tables by default" do
       manager.build "false_mirror_test"
 
       expect(
         dyna.find("#{manager.table_name('false_mirror_test')}_2")
-      ).to be_nil
+      ).to be_false
     end
 
     it "munges model names into a DynamoDB-approved format" do
