@@ -23,4 +23,5 @@ describe Moe::Config do
       expect( Moe.config.tables["foo"] ).to eq("star")
     end
   end
+  
 end

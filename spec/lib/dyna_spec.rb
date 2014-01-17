@@ -32,6 +32,17 @@ describe Moe::Dyna do
     end
   end
 
+  describe "#batch_write_item" do
+    it "writes a batch of items" do
+      items = dyna.batch_write_item [table.table_name], [item, { "id" => { s: "zoo" } }]
+      result = dyna.get_item [table.table_name], { "id" => { s: "zoo" } }
+
+      expect(
+        result["id"]["s"]
+      ).to eq("zoo")
+    end
+  end
+
   describe "#get_item" do
     it "gets an item" do
       dynamodb.put_item table_name: table.table_name, item: item

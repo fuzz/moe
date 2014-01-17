@@ -7,17 +7,11 @@ module Moe
       @dynamodb = Aws.dynamodb
     end
 
-    def get_item(read_tables, key)
-      item = nil
-      while !item
-        item = dynamodb.get_item(table_name: read_tables.pop, key: key).item
-      end
-      item
-    end
-
-    def put_item(write_tables, item)
+    def batch_write_item(write_tables, items)
       write_tables.each do |table_name|
-        dynamodb.put_item table_name: table_name, item: item
+        dynamodb.batch_write_item request_items: {
+          table_name => batchify(items)
+        }
       end
     end
 
@@ -33,6 +27,21 @@ module Moe
       tables
     end
 
+    def get_item(read_tables, key)
+      item = nil
+      read_tables.each do |table_name|
+        item = dynamodb.get_item(table_name: table_name, key: key).item
+        break if item
+      end
+      item
+    end
+
+    def put_item(write_tables, item)
+      write_tables.each do |table_name|
+        dynamodb.put_item table_name: table_name, item: item
+      end
+    end
+
     def find(name)
       if dynamodb.list_tables.table_names.include? name
         dynamodb.describe_table table_name: name
@@ -42,6 +51,14 @@ module Moe
     end
 
     private
+
+    def batchify(items)
+      items.map { |item|
+        { put_request:
+          { item: item }
+        }
+      }
+    end
 
     def template(name, hash_key, read_capacity, write_capacity)
       { table_name: name,

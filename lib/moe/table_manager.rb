@@ -18,6 +18,7 @@ module Moe
                       read_capacity,
                       write_capacity
 
+      [ read_tables, write_tables ]
     end
 
     def increment(model)
