@@ -16,15 +16,14 @@ module Moe
     end
 
     def create(name, copies=1, hash_key="hash", range_key=nil, read_capacity=5, write_capacity=10)
-      tables = []
+      [].tap do |tables|
+        1.upto(copies).each do |copy|
+          schema = table_schema("#{name}_#{copy}", hash_key, range_key, read_capacity, write_capacity)
+          table  = dynamodb.create_table schema
 
-      1.upto(copies).each do |copy|
-        schema = table_schema("#{name}_#{copy}", hash_key, range_key, read_capacity, write_capacity)
-        table  = dynamodb.create_table schema
-
-        tables << "#{name}_#{copy}"
+          tables << "#{name}_#{copy}"
+        end
       end
-      tables
     end
 
     def get_item(read_tables, key)
@@ -61,7 +60,7 @@ module Moe
     end
 
     def table_schema(name, hash_key, range_key, read_capacity, write_capacity)
-      table = { table_name: name,
+      { table_name: name,
         key_schema: [
           attribute_name: hash_key,
           key_type: "HASH"
@@ -76,14 +75,12 @@ module Moe
           read_capacity_units: read_capacity,
           write_capacity_units: write_capacity
         }
-      }
-
-      if range_key
-        table[:key_schema] << { attribute_name: range_key, key_type: "RANGE" }
-        table[:attribute_definitions] << { attribute_name: range_key, attribute_type: "S" }
+      }.tap do |table|
+        if range_key
+          table[:key_schema] << { attribute_name: range_key, key_type: "RANGE" }
+          table[:attribute_definitions] << { attribute_name: range_key, attribute_type: "S" }
+        end
       end
-
-      table
     end
   end
 end

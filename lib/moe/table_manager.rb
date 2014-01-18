@@ -92,17 +92,15 @@ module Moe
     private
 
     def get_key(key_schema)
-      key = {}
-
-      key_schema.each do |k|
-        if k.key_type == "HASH"
-          key[:hash]  = k.attribute_name
-        else
-          key[:range] = k.attribute_name
+      {}.tap do |key|
+        key_schema.each do |k|
+          if k.key_type == "HASH"
+            key[:hash]  = k.attribute_name
+          else
+            key[:range] = k.attribute_name
+          end
         end
       end
-
-      key
     end
 
     def munged_model(model)
