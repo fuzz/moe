@@ -54,7 +54,7 @@ describe Moe::Models::Sequence do
                   "range" => { s: "#{i}.foo" } })
       end
 
-      result = dyna.get_item seq.read_tables, { "hash"  => { s: "batz10" },
+      result = dyna.get_item seq.read_tables, { "hash"  => { s: "batz" },
                                                 "range" => { s: "10.foo" } }
 
       expect( result ).to be_nil
@@ -71,14 +71,21 @@ describe Moe::Models::Sequence do
 
       expect( result["hash"]["s"] ).to eq("baz")
     end
+
+    it "increments the flushed counter when it flushes" do
+      1.upto(15) do |i|
+        seq.add({ "hash"  => { s: "bazz" },
+                  "range" => { s: "#{i}.foo" } })
+      end
+
+      expect( seq.flushed_count ).to eq(15)
+    end
+
+    it "initializes a v4 uuid" do
+      seq.add({ "bak" => "bazk" })
+
+      expect( seq.uuid ).to match(/[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}/)
+    end
   end
 
-  #describe "#add_metadata" do
-  #  it "adds the metadata item to the item array" do
-  #    seq.add_metadata(item
 end
-# throw it in some fucking notes at the end
-# look
-# do not worry about initialization or setup tests
-# keep implementing
-# you will hit a point where you have to implement range key soon enough bro

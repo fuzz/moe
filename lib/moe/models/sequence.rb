@@ -1,8 +1,8 @@
 module Moe
   module Models
     class Sequence
-      attr_accessor :dyna, :items
-      attr_reader   :read_tables, :write_tables
+      attr_accessor :dyna, :flushed_count, :items
+      attr_reader   :read_tables, :write_tables, :uuid
 
       BATCH_LIMIT = 15
 
@@ -20,19 +20,26 @@ module Moe
       extend ClassMethods
 
       def initialize(name)
-        @dyna = Dyna.new
-        @items = []
+        @dyna          = Dyna.new
+        @flushed_count = 0
+        @items         = []
         @read_tables, @write_tables = Moe.config.tables[name]
       end
 
       def add(item)
+        @uuid ||= SecureRandom.uuid
+
         items << item
 
         flush if items.size >= BATCH_LIMIT
       end
 
+      private
+
       def flush
         dyna.batch_write_item write_tables, items
+
+        self.flushed_count += items.size
       end
     end
   end

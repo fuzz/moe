@@ -53,11 +53,11 @@ module Moe
     private
 
     def batchify(items)
-      items.map { |item|
+      items.map do |item|
         { put_request:
           { item: item }
         }
-      }
+      end
     end
 
     def table_schema(name, hash_key, range_key, read_capacity, write_capacity)
