@@ -7,12 +7,12 @@ module Moe
       BATCH_LIMIT = 15
 
       module ClassMethods
-        def setup(name, copies, read_capacity, write_capacity)
+        def setup(name, copies, hash_key="hash", range_key="range", read_capacity, write_capacity)
           return "#{name} already exists in config" if Moe.config.tables[name]
 
           table_manager = TableManager.new
 
-          tables = table_manager.build name, copies, read_capacity, write_capacity
+          tables = table_manager.build name, copies, hash_key, range_key, read_capacity, write_capacity
 
           Moe.config.tables[name] = tables
         end

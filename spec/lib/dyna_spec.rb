@@ -3,12 +3,12 @@ require "spec_helper"
 $count = 0
 
 describe Moe::Dyna do
-  let(:count) { $count += 1 }
-  let(:dynamodb) { Aws.dynamodb }
-  let(:item) { { "id" => { s: "test#{count}" } } }
-  let(:dyna) { Moe::Dyna.new }
-  let(:created_tables) { dyna.create("Testy#{count}") }
-  let(:table) { dyna.find(created_tables.first).table }
+  let(:count)           { $count += 1 }
+  let(:dynamodb)        { Aws.dynamodb }
+  let(:item)            { { "hash" => { s: "test#{count}" } } }
+  let(:dyna)            { Moe::Dyna.new }
+  let(:created_tables)  { dyna.create("Testy#{count}") }
+  let(:table)           { dyna.find(created_tables.first).table }
 
   describe "#create" do
     it "creates a new table" do
@@ -34,12 +34,10 @@ describe Moe::Dyna do
 
   describe "#batch_write_item" do
     it "writes a batch of items" do
-      items = dyna.batch_write_item [table.table_name], [item, { "id" => { s: "zoo" } }]
-      result = dyna.get_item [table.table_name], { "id" => { s: "zoo" } }
+      items = dyna.batch_write_item [table.table_name], [item, { "hash" => { s: "zoo" } }]
+      result = dyna.get_item [table.table_name], { "hash" => { s: "zoo" } }
 
-      expect(
-        result["id"]["s"]
-      ).to eq("zoo")
+      expect( result["hash"]["s"] ).to eq("zoo")
     end
   end
 
@@ -48,9 +46,7 @@ describe Moe::Dyna do
       dynamodb.put_item table_name: table.table_name, item: item
       result = dyna.get_item [table.table_name], item
 
-      expect(
-        result["id"]["s"]
-      ).to eq("test#{count}")
+      expect( result["hash"]["s"] ).to eq("test#{count}")
     end
 
     it "gets an item across multiple tables" do
@@ -58,9 +54,7 @@ describe Moe::Dyna do
       empty_table = dyna.create "Testy#{count}_empty"
       result      = dyna.get_item [table.table_name, "Testy#{count}_empty_1"], item
 
-      expect(
-        result["id"]["s"]
-      ).to eq("test#{count}")
+      expect( result["hash"]["s"] ).to eq("test#{count}")
     end
   end
 
@@ -85,7 +79,7 @@ describe Moe::Dyna do
       dyna.put_item [table.table_name], item
 
       expect(
-        dynamodb.get_item(table_name: table.table_name, key: item).item["id"]["s"]
+        dynamodb.get_item(table_name: table.table_name, key: item).item["hash"]["s"]
       ).to eq("test#{count}")
     end
 
@@ -94,8 +88,8 @@ describe Moe::Dyna do
       dyna.put_item ["Testie#{count}_1", "Testie#{count}_2"], item
 
       expect(
-        dynamodb.get_item(table_name: "Testie#{count}_1", key: item).item["id"]["s"]
-      ).to eq(dynamodb.get_item(table_name: "Testie#{count}_2", key: item).item["id"]["s"])
+        dynamodb.get_item(table_name: "Testie#{count}_1", key: item).item["hash"]["s"]
+      ).to eq(dynamodb.get_item(table_name: "Testie#{count}_2", key: item).item["hash"]["s"])
     end
   end
 end

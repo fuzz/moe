@@ -120,7 +120,7 @@ describe Moe::TableManager do
                               "10"
 
       result = dyna.get_item manager.meta_table_names,
-                                   { "id" => { s: "testie" } }
+                                   { "hash" => { s: "testie" } }
 
       expect(
         result["write_tables"]["s"]

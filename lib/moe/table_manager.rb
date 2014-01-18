@@ -9,8 +9,8 @@ module Moe
       @meta = dyna.find(meta_table_names.first) || dyna.create(meta_table_name, 2)
     end
 
-    def build(model, copies=1, read_capacity=5, write_capacity=10, read_tables=[])
-      write_tables = dyna.create table_name(model), copies, "id", read_capacity, write_capacity
+    def build(model, copies=1, hash_key="hash", range_key=nil, read_capacity=5, write_capacity=10, read_tables=[])
+      write_tables = dyna.create table_name(model), copies, hash_key, range_key, read_capacity, write_capacity
 
       update_metadata model,
                       read_tables << write_tables.first,
@@ -29,16 +29,25 @@ module Moe
       read_capacity   = write_table.table.provisioned_throughput.read_capacity_units
       write_capacity  = write_table.table.provisioned_throughput.write_capacity_units
 
+      key = {}
+      write_table.table.key_schema.each do |k|
+        if k.key_type == "HASH"
+          key[:hash]  = k.attribute_name
+        else
+          key[:range] = k.attribute_name
+        end
+      end
+
       if write_table.table.table_name.include? date
         raise "Moe sez: Cannot increment twice on the same day!"
       end
 
-      build model, write_tables.size, read_capacity, write_capacity, read_tables
+      build model, write_tables.size, key[:hash], key[:range], read_capacity, write_capacity, read_tables
     end
 
     def load_metadata(model)
       metadata = dyna.get_item meta_table_names,
-                                { "id" => { s: munged_model(model) } }
+                                { "hash" => { s: munged_model(model) } }
 
       {
         read_tables:  Serializers::Commafy.load(metadata["read_tables"]["s"]),
@@ -60,7 +69,7 @@ module Moe
 
     def update_metadata(model, read_tables=[], write_tables=[], read_capacity, write_capacity)
       item = { 
-        "id"             => { s:  munged_model(model) },
+        "hash"           => { s:  munged_model(model) },
         "read_tables"    => { s:  Serializers::Commafy.dump(read_tables) },
         "write_tables"   => { s:  Serializers::Commafy.dump(write_tables) },
         "read_capactity" => { s:  read_capacity.to_s },
