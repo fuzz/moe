@@ -10,7 +10,12 @@ module Moe
     end
 
     def build(model, copies=1, hash_key="hash", range_key=nil, read_capacity=5, write_capacity=10, read_tables=[])
-      write_tables = dyna.create table_name(model), copies, hash_key, range_key, read_capacity, write_capacity
+      write_tables =  dyna.create table_name(model),
+                      copies,
+                      hash_key,
+                      range_key,
+                      read_capacity,
+                      write_capacity
 
       update_metadata model,
                       read_tables << write_tables.first,
@@ -22,27 +27,21 @@ module Moe
     end
 
     def increment(model)
-      table_metadata  = load_metadata model
-      read_tables     = table_metadata[:read_tables]
-      write_tables    = table_metadata[:write_tables]
-      write_table     = dyna.find write_tables.first
-      read_capacity   = write_table.table.provisioned_throughput.read_capacity_units
-      write_capacity  = write_table.table.provisioned_throughput.write_capacity_units
+      metadata = load_metadata model
 
-      key = {}
-      write_table.table.key_schema.each do |k|
-        if k.key_type == "HASH"
-          key[:hash]  = k.attribute_name
-        else
-          key[:range] = k.attribute_name
-        end
-      end
+      table    = load_table metadata[:write_tables].first
 
-      if write_table.table.table_name.include? date
+      if table[:table_name].include? date
         raise "Moe sez: Cannot increment twice on the same day!"
       end
 
-      build model, write_tables.size, key[:hash], key[:range], read_capacity, write_capacity, read_tables
+      build model,
+            metadata[:write_tables].size,
+            table[:key][:hash],
+            table[:key][:range],
+            table[:read_capacity],
+            table[:write_capacity],
+            metadata[:read_tables]
     end
 
     def load_metadata(model)
@@ -52,6 +51,17 @@ module Moe
       {
         read_tables:  Serializers::Commafy.load(metadata["read_tables"]["s"]),
         write_tables: Serializers::Commafy.load(metadata["write_tables"]["s"])
+      }
+    end
+
+    def load_table(table_name)
+      table = dyna.find table_name
+
+      {
+        table_name:     table.table.table_name,
+        key:            get_key(table.table.key_schema),
+        read_capacity:  table.table.provisioned_throughput.read_capacity_units,
+        write_capacity: table.table.provisioned_throughput.write_capacity_units
       }
     end
 
@@ -80,6 +90,20 @@ module Moe
     end
 
     private
+
+    def get_key(key_schema)
+      key = {}
+
+      key_schema.each do |k|
+        if k.key_type == "HASH"
+          key[:hash]  = k.attribute_name
+        else
+          key[:range] = k.attribute_name
+        end
+      end
+
+      key
+    end
 
     def munged_model(model)
       model.gsub(/::/, "_")
