@@ -12,7 +12,12 @@ module Moe
 
           table_manager = TableManager.new
 
-          tables = table_manager.build name, copies, hash_key, range_key, read_capacity, write_capacity
+          tables = table_manager.build name,
+                                       copies,
+                                       hash_key,
+                                       range_key,
+                                       read_capacity,
+                                       write_capacity
 
           Moe.config.tables[name] = tables
         end

@@ -18,7 +18,12 @@ module Moe
     def create(name, copies=1, hash_key="hash", range_key=nil, read_capacity=5, write_capacity=10)
       [].tap do |tables|
         1.upto(copies).each do |copy|
-          schema = table_schema("#{name}_#{copy}", hash_key, range_key, read_capacity, write_capacity)
+          schema = table_schema "#{name}_#{copy}",
+                                hash_key,
+                                range_key,
+                                read_capacity,
+                                write_capacity
+
           table  = dynamodb.create_table schema
 
           tables << "#{name}_#{copy}"
@@ -77,8 +82,10 @@ module Moe
         }
       }.tap do |table|
         if range_key
-          table[:key_schema] << { attribute_name: range_key, key_type: "RANGE" }
-          table[:attribute_definitions] << { attribute_name: range_key, attribute_type: "S" }
+          table[:key_schema]            << { attribute_name: range_key,
+                                             key_type: "RANGE" }
+          table[:attribute_definitions] << { attribute_name: range_key,
+                                             attribute_type: "S" }
         end
       end
     end
