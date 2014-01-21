@@ -8,9 +8,7 @@ module Moe
     end
 
     def batch_write_item(write_tables, items)
-      #binding.pry
-      explosion = explode items
-
+      explosion = items.map { |item| explode item }
 
       write_tables.each do |table_name|
         dynamodb.batch_write_item request_items: {
@@ -35,6 +33,14 @@ module Moe
       end
     end
 
+    def explode(item)
+      clone = item.clone
+
+      clone.each do |key, value|
+        clone[key] = { s: value }
+      end
+    end
+
     def get_item(read_tables, key)
       item = nil
       read_tables.each do |table_name|
@@ -46,7 +52,7 @@ module Moe
 
     def put_item(write_tables, item)
       write_tables.each do |table_name|
-        dynamodb.put_item table_name: table_name, item: item
+        dynamodb.put_item table_name: table_name, item: explode(item)
       end
     end
 
@@ -65,16 +71,6 @@ module Moe
         { put_request:
           { item: item }
         }
-      end
-    end
-
-    def explode(items)
-      items.map do |item|
-        clone = item.clone
-
-        clone.each do |key, value|
-          clone[key] = { s: value }
-        end #.merge key(owner_id, item_id, sequence_id)
       end
     end
 

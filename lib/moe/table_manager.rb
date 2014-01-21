@@ -79,11 +79,11 @@ module Moe
 
     def update_metadata(model, read_tables=[], write_tables=[], read_capacity, write_capacity)
       item = { 
-        "hash"           => { s:  munged_model(model) },
-        "read_tables"    => { s:  Serializers::Commafy.dump(read_tables) },
-        "write_tables"   => { s:  Serializers::Commafy.dump(write_tables) },
-        "read_capactity" => { s:  read_capacity.to_s },
-        "write_capacity" => { s:  write_capacity.to_s },
+        "hash"           => munged_model(model),
+        "read_tables"    => Serializers::Commafy.dump(read_tables),
+        "write_tables"   => Serializers::Commafy.dump(write_tables),
+        "read_capactity" => read_capacity.to_s,
+        "write_capacity" => write_capacity.to_s,
       }
 
       dyna.put_item meta_table_names, item

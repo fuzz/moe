@@ -7,6 +7,7 @@ describe Moe::Dyna do
   let(:dynamodb)        { Aws.dynamodb }
   let(:item)            { { "hash" => "test#{count}" } }
   let(:dyna)            { Moe::Dyna.new }
+  let(:dynamo_item)     { dyna.explode(item) }
   let(:created_tables)  { dyna.create("Testy#{count}") }
   let(:table)           { dyna.find(created_tables.first).table }
 
@@ -44,16 +45,16 @@ describe Moe::Dyna do
 
   describe "#get_item" do
     it "gets an item" do
-      dynamodb.put_item table_name: table.table_name, item: item
-      result = dyna.get_item [table.table_name], item
+      dynamodb.put_item table_name: table.table_name, item: dynamo_item
+      result = dyna.get_item [table.table_name], dynamo_item
 
       expect( result["hash"]["s"] ).to eq("test#{count}")
     end
 
     it "gets an item across multiple tables" do
-      dynamodb.put_item table_name: table.table_name, item: item
+      dynamodb.put_item table_name: table.table_name, item: dynamo_item
       empty_table = dyna.create "Testy#{count}_empty"
-      result      = dyna.get_item [table.table_name, "Testy#{count}_empty_1"], item
+      result      = dyna.get_item [table.table_name, "Testy#{count}_empty_1"], dynamo_item
 
       expect( result["hash"]["s"] ).to eq("test#{count}")
     end
@@ -80,7 +81,7 @@ describe Moe::Dyna do
       dyna.put_item [table.table_name], item
 
       expect(
-        dynamodb.get_item(table_name: table.table_name, key: item).item["hash"]["s"]
+        dynamodb.get_item(table_name: table.table_name, key: dynamo_item).item["hash"]["s"]
       ).to eq("test#{count}")
     end
 
@@ -89,8 +90,8 @@ describe Moe::Dyna do
       dyna.put_item ["Testie#{count}_1", "Testie#{count}_2"], item
 
       expect(
-        dynamodb.get_item(table_name: "Testie#{count}_1", key: item).item["hash"]["s"]
-      ).to eq(dynamodb.get_item(table_name: "Testie#{count}_2", key: item).item["hash"]["s"])
+        dynamodb.get_item(table_name: "Testie#{count}_1", key: dynamo_item).item["hash"]["s"]
+      ).to eq(dynamodb.get_item(table_name: "Testie#{count}_2", key: dynamo_item).item["hash"]["s"])
     end
   end
 end
