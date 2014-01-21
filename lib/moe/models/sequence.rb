@@ -51,7 +51,7 @@ module Moe
 
         keyify
 
-        items.unshift metadata_item
+        items << metadata_item
 
         flush
       end

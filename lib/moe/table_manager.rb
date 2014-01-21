@@ -106,6 +106,5 @@ module Moe
     def munged_model(model)
       model.gsub(/::/, "_")
     end
-
   end
 end

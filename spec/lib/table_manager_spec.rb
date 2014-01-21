@@ -127,5 +127,4 @@ describe Moe::TableManager do
       ).to match("testie")
     end
   end
-
 end
