@@ -4,12 +4,22 @@ $count = 0
 
 describe Moe::Dyna do
   let(:count)           { $count += 1 }
+  let(:dyna)            { Moe::Dyna.new }
   let(:dynamodb)        { Aws.dynamodb }
   let(:item)            { { "hash" => "test#{count}" } }
-  let(:dyna)            { Moe::Dyna.new }
   let(:dynamo_item)     { dyna.explode(item) }
   let(:created_tables)  { dyna.create("Testy#{count}") }
   let(:table)           { dyna.find(created_tables.first).table }
+
+  describe "#batch_write_item" do
+    it "writes a batch of items" do
+
+      items = dyna.batch_write_item [table.table_name], [item, { "hash" => "zoo" }]
+      result = dyna.get_item [table.table_name], { "hash" => { s: "zoo" } }
+
+      expect( result["hash"]["s"] ).to eq("zoo")
+    end
+  end
 
   describe "#create" do
     it "creates a new table" do
@@ -33,13 +43,11 @@ describe Moe::Dyna do
     end
   end
 
-  describe "#batch_write_item" do
-    it "writes a batch of items" do
-
-      items = dyna.batch_write_item [table.table_name], [item, { "hash" => "zoo" }]
-      result = dyna.get_item [table.table_name], { "hash" => { s: "zoo" } }
-
-      expect( result["hash"]["s"] ).to eq("zoo")
+  describe "#explode" do
+    it "given a plain hash it returns a DynamoDB-flavored hash" do
+      expect(
+        dyna.explode({ "foo" => "bar" })
+      ).to eq({"foo" => { s: "bar" } })
     end
   end
 
