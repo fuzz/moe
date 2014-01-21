@@ -7,7 +7,7 @@ describe Moe::Models::Sequence do
   let(:dyna)   { Moe::Dyna.new }
   let(:name)   { "seq_test#{count}" }
   let!(:setup) { Moe::Models::Sequence.setup name, 2, 5, 10 }
-  let(:seq)    { Moe::Models::Sequence.new name }
+  let(:seq)    { Moe::Models::Sequence.new name, "owner" }
 
   describe Moe::Models::Sequence::ClassMethods do
     describe ".setup" do
@@ -84,7 +84,22 @@ describe Moe::Models::Sequence do
     it "initializes a v4 uuid" do
       seq.add({ "bak" => "bazk" })
 
-      expect( seq.uuid ).to match(/[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}/)
+      expect(
+        seq.uuid
+      ).to match(/[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}/)
+    end
+  end
+
+  describe "#save" do
+    it "persists a metadata item" do
+      seq.add #({ "hash"  => { s: "bazzz" },
+              #  "range" => { s: "1.foo" } })
+      seq.save
+
+      result = dyna.get_item seq.read_tables, { "hash"  => { s: "owner" },
+                                                "range" => { s: "0.#{seq.uuid}" } }
+
+      expect( result["hash"]["s"] ).to eq("owner")
     end
   end
 
