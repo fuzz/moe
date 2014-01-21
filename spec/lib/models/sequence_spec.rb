@@ -50,39 +50,36 @@ describe Moe::Models::Sequence do
 
     it "does not flush before it hits the batch limit" do
       1.upto(10) do |i|
-        seq.add({ "hash"  => { s: "batz" },
-                  "range" => { s: "#{i}.foo" } })
+        seq.add
       end
 
-      result = dyna.get_item seq.read_tables, { "hash"  => { s: "batz" },
-                                                "range" => { s: "10.foo" } }
+      result = dyna.get_item seq.read_tables, { "hash"  => { s: "owner" },
+                                                "range" => { s: "10.#{seq.uuid}" } }
 
       expect( result ).to be_nil
     end
 
     it "flushes when it hits the batch limit" do
       1.upto(15) do |i|
-        seq.add({ "hash"  => { s: "baz" },
-                  "range" => { s: "#{i}.foo" } })
+        seq.add
       end
 
-      result = dyna.get_item seq.read_tables, { "hash"  => { s: "baz" },
-                                                "range" => { s: "15.foo" } }
+      result = dyna.get_item seq.read_tables, { "hash"  => { s: "owner" },
+                                                "range" => { s: "15.#{seq.uuid}" } }
 
-      expect( result["hash"]["s"] ).to eq("baz")
+      expect( result["hash"]["s"] ).to eq("owner")
     end
 
     it "increments the flushed counter when it flushes" do
       1.upto(15) do |i|
-        seq.add({ "hash"  => { s: "bazz" },
-                  "range" => { s: "#{i}.foo" } })
+        seq.add
       end
 
       expect( seq.flushed_count ).to eq(15)
     end
 
     it "initializes a v4 uuid" do
-      seq.add({ "bak" => "bazk" })
+      seq.add
 
       expect(
         seq.uuid
@@ -92,8 +89,7 @@ describe Moe::Models::Sequence do
 
   describe "#save" do
     it "persists a metadata item" do
-      seq.add #({ "hash"  => { s: "bazzz" },
-              #  "range" => { s: "1.foo" } })
+      seq.add
       seq.save
 
       result = dyna.get_item seq.read_tables, { "hash"  => { s: "owner" },
@@ -102,5 +98,4 @@ describe Moe::Models::Sequence do
       expect( result["hash"]["s"] ).to eq("owner")
     end
   end
-
 end

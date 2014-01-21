@@ -37,22 +37,21 @@ module Moe
 
         items << item
 
-        flush if items.size >= BATCH_LIMIT
+        if items.size >= BATCH_LIMIT
+          keyify
+          flush
+        end
       end
 
       def save(item={})
         metadata_item = {
           "count"    => { s: (items.size + flushed_count).to_s },
           "saved_at" => { s: Time.now.to_s }
-        }.merge item
+        }.merge(item).merge key 0
+
+        keyify
 
         items.unshift metadata_item
-
-        count = 0 
-        items.each do |item|
-          item.update key count
-          count += 1
-        end
 
         flush
       end
@@ -72,7 +71,7 @@ module Moe
         }
       end
 
-      def shit
+      def keyify
         count = flushed_count
         items.each do |item|
           count += 1
