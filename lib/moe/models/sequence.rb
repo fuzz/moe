@@ -45,8 +45,8 @@ module Moe
 
       def save(item={})
         metadata_item = {
-          "count"    => { s: (items.size + flushed_count).to_s },
-          "saved_at" => { s: Time.now.to_s }
+          "count"    => (items.size + flushed_count).to_s,
+          "saved_at" => Time.now.to_s
         }.merge(item).merge key 0
 
         keyify
@@ -66,8 +66,8 @@ module Moe
 
       def key(sequence_id)
         {
-          "hash"     => { s: owner_id },
-          "range"    => { s: "#{sequence_id}.#{uuid}" }
+          "hash"     => owner_id,
+          "range"    => "#{sequence_id}.#{uuid}"
         }
       end
 

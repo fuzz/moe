@@ -5,7 +5,7 @@ $count = 0
 describe Moe::Dyna do
   let(:count)           { $count += 1 }
   let(:dynamodb)        { Aws.dynamodb }
-  let(:item)            { { "hash" => { s: "test#{count}" } } }
+  let(:item)            { { "hash" => "test#{count}" } }
   let(:dyna)            { Moe::Dyna.new }
   let(:created_tables)  { dyna.create("Testy#{count}") }
   let(:table)           { dyna.find(created_tables.first).table }
@@ -34,7 +34,8 @@ describe Moe::Dyna do
 
   describe "#batch_write_item" do
     it "writes a batch of items" do
-      items = dyna.batch_write_item [table.table_name], [item, { "hash" => { s: "zoo" } }]
+
+      items = dyna.batch_write_item [table.table_name], [item, { "hash" => "zoo" }]
       result = dyna.get_item [table.table_name], { "hash" => { s: "zoo" } }
 
       expect( result["hash"]["s"] ).to eq("zoo")
