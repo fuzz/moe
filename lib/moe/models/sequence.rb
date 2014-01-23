@@ -7,15 +7,15 @@ module Moe
       BATCH_LIMIT = 15
 
       module ClassMethods
-        def setup(name, copies, hash_key="hash", range_key="range", read_capacity, write_capacity)
+        def setup(name, copies, read_capacity, write_capacity)
           return "#{name} already exists in config" if Moe.config.tables[name]
 
           table_manager = TableManager.new
 
           tables = table_manager.build name,
                                        copies,
-                                       hash_key,
-                                       range_key,
+                                       "hash",
+                                       "range",
                                        read_capacity,
                                        write_capacity
 
@@ -60,11 +60,7 @@ module Moe
         implode_batch results.responses
       end
 
-      def get_metadata_items(owner_id)
-        results = query owner_id, read_tables
-      end
-
-      def query(owner_id, read_tables, metadata=true)
+      def get_metadata_items
         results = []
 
         read_tables.each do |table_name|
@@ -72,21 +68,20 @@ module Moe
           request = {
             table_name: table_name,
             key_conditions: {
-              "hash" => {
+              hash: {
                 attribute_value_list: [
                   { s: owner_id }
                 ],
                 comparison_operator: "EQ"
               },
+              range: {
+                attribute_value_list: [
+                  { s: "0" }
+                ],
+                comparison_operator: "BEGINS_WITH"
+              }
             }
           }
-
-          request[:key_conditions]["range"] = {
-            attribute_value_list: [
-              { s: "0" }
-            ],
-            comparison_operator: "BEGINS_WITH"
-          } if metadata
 
           results << { table_name => dyna.dynamodb.query(request).items }
         end
@@ -129,8 +124,8 @@ module Moe
 
       def key(sequence_id, uid=uuid)
         {
-          "hash"     => owner_id,
-          "range"    => "#{sequence_id}.#{uid}"
+          "hash"  => owner_id,
+          "range" => "#{sequence_id}.#{uid}"
         }
       end
 

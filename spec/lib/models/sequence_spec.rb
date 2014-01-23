@@ -93,7 +93,7 @@ describe Moe::Models::Sequence do
       seq.add
       seq.save
 
-      metadata = seq.get_metadata_items "owner"
+      metadata = seq.get_metadata_items
 
       items = seq.get_items metadata.first.first,
                             metadata.first.last.first["range"].gsub(/0\./, ""),
@@ -108,15 +108,8 @@ describe Moe::Models::Sequence do
       seq.save({ "foo" => "bar" })
 
       expect(
-        seq.get_metadata_items("owner").first.last.first["foo"]
+        seq.get_metadata_items.first.last.first["foo"]
       ).to eq("bar")
-    end
-  end
-
-  describe "#query" do
-    it "retrieves items" do
-      seq.save
-      seq.query("owner", seq.read_tables, true)
     end
   end
 
