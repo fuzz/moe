@@ -43,6 +43,37 @@ module Moe
         end
       end
 
+      def batch_get(results)
+        implode_batch client.batch_get_item(results)
+      end
+
+      def get_items(table_name, uid, count)
+        request = {
+          request_items: {
+            table_name => { keys: [] }
+          }
+        }
+        keys = request[:request_items][table_name][:keys]
+
+        1.upto(count.to_i) do |sequence_id|
+          keys << dyna.explode( key(sequence_id, uid) )
+        end
+
+        results = dyna.dynamodb.batch_get_item(request)
+
+        implode_batch results.responses
+      end
+
+      def implode_batch(batch)
+        results = []
+        batch.each_value do |item|
+          item.each do |i|
+            results << dyna.implode(i)
+          end
+        end
+        results
+      end
+
       def get_metadata_items(owner_id)
         results = query owner_id, read_tables, true
       end
@@ -52,7 +83,7 @@ module Moe
 
         read_tables.each do |table_name|
 
-          items = {
+        request = {
             table_name: table_name,
             key_conditions: {
               "hash" => {
@@ -64,14 +95,14 @@ module Moe
             }
           }
 
-          items[:key_conditions]["range"] = {
+          request[:key_conditions]["range"] = {
             attribute_value_list: [
               { s: "0" }
             ],
             comparison_operator: "BEGINS_WITH"
           } if join
 
-          results << { table_name => dyna.dynamodb.query(items).items }
+          results << { table_name => dyna.dynamodb.query(request).items }
         end
 
         parse_query_results(results)
@@ -95,15 +126,15 @@ module Moe
       private
 
       def flush
-        dyna.batch_write_item write_tables, items
+        result = dyna.batch_write_item write_tables, items
 
         self.flushed_count += items.size
       end
 
-      def key(sequence_id)
+      def key(sequence_id, uid=uuid)
         {
           "hash"     => owner_id,
-          "range"    => "#{sequence_id}.#{uuid}"
+          "range"    => "#{sequence_id}.#{uid}"
         }
       end
 

@@ -87,8 +87,24 @@ describe Moe::Models::Sequence do
     end
   end
 
+  describe "#get_items" do
+    it "gets all items for a given uuid" do
+      seq.add
+      seq.add
+      seq.save
+
+      metadata = seq.get_metadata_items "owner"
+
+      items = seq.get_items metadata.first.first,
+                            metadata.first.last.first["range"].gsub(/0\./, ""),
+                            metadata.first.last.first["count"]
+
+      expect( items.size ).to eq(2)
+    end
+  end
+
   describe "#get_metadata_items" do
-    it "gets all metadata records for a given owner" do
+    it "gets all metadata items for a given owner" do
       seq.save({ "foo" => "bar" })
 
       expect(
