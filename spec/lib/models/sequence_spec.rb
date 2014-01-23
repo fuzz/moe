@@ -87,6 +87,23 @@ describe Moe::Models::Sequence do
     end
   end
 
+  describe "#get_metadata_items" do
+    it "gets all metadata records for a given owner" do
+      seq.save({ "foo" => "bar" })
+
+      expect(
+        seq.get_metadata_items("owner").first.last.first["foo"]
+      ).to eq("bar")
+    end
+  end
+
+  describe "#query" do
+    it "retrieves items" do
+      seq.save
+      seq.query("owner", seq.read_tables, true)
+    end
+  end
+
   describe "#save" do
     it "persists a metadata item" do
       seq.add

@@ -44,7 +44,7 @@ describe Moe::Dyna do
   end
 
   describe "#explode" do
-    it "given a plain hash it returns a DynamoDB-flavored hash" do
+    it "returns a DynamoDB-flavored hash given a plain hash" do
       expect(
         dyna.explode({ "foo" => "bar" })
       ).to eq({"foo" => { s: "bar" } })
@@ -65,6 +65,14 @@ describe Moe::Dyna do
       result      = dyna.get_item [table.table_name, "Testy#{count}_empty_1"], dynamo_item
 
       expect( result["hash"]["s"] ).to eq("test#{count}")
+    end
+  end
+
+  describe "#implode" do
+    it "returns a plain hash given a DynamoDB-flavored hash" do
+      expect(
+        dyna.implode({"foo" => { s: "bar" } })
+      ).to eq({ "foo" => "bar" })
     end
   end
 

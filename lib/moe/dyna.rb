@@ -50,6 +50,10 @@ module Moe
       item
     end
 
+    def implode(item)
+      item.each_key { |key| item[key] = item[key][:s] }.to_h
+    end
+
     def put_item(write_tables, item)
       write_tables.each do |table_name|
         dynamodb.put_item table_name: table_name, item: explode(item)
