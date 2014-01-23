@@ -51,7 +51,7 @@ module Moe
     end
 
     def implode(item)
-      item.each_key { |key| item[key] = item[key][:s] }.to_h
+      item.each_key { |key| item[key] = item[key][:s] }
     end
 
     def put_item(write_tables, item)

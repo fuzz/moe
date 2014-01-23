@@ -1,4 +1,5 @@
 require "aws-sdk-core"
+require "securerandom"
 
 require "moe/config"
 require "moe/dyna"
