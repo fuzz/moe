@@ -69,7 +69,7 @@ module Moe
 
         read_tables.each do |table_name|
 
-        request = {
+          request = {
             table_name: table_name,
             key_conditions: {
               "hash" => {
