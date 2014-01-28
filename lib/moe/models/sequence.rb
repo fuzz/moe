@@ -1,7 +1,7 @@
 module Moe
   module Models
     class Sequence
-      attr_accessor :dyna, :flushed_count, :items
+      attr_accessor :dyna, :flushed_count, :payloads
       attr_reader   :owner_id, :read_tables, :write_tables, :uuid
 
       BATCH_LIMIT = 15
@@ -27,19 +27,19 @@ module Moe
       def initialize(name, owner_id)
         @dyna          = Dyna.new
         @flushed_count = 0
-        @items         = []
+        @payloads      = []
         @owner_id      = owner_id
         @read_tables, @write_tables = Moe.config.tables[name]
       end
 
-      def add(item={})
+      def add(payload={})
         @uuid ||= SecureRandom.uuid
 
-        items << item
+        payloads << payload
 
-        if items.size >= BATCH_LIMIT
-          keyify
-          flush
+        if payloads.size >= BATCH_LIMIT
+          items = keyify payloads
+          flush items
         end
       end
 
@@ -89,24 +89,25 @@ module Moe
         parse_query_results(results)
       end
 
-      def save(item={})
+      def save(payload={})
         @uuid ||= SecureRandom.uuid
 
         metadata_item = {
-          "count"    => (items.size + flushed_count).to_s,
-          "saved_at" => Time.now.to_s
-        }.merge(item).merge key 0
+          "count"    => (payloads.size + flushed_count).to_s,
+          "saved_at" => Time.now.to_s,
+          "payload"  => MultiJson.dump(payload)
+        }.merge itemize payload, 0
 
-        keyify
+        items = keyify payloads
 
         items << metadata_item
 
-        flush
+        flush items
       end
 
       private
 
-      def flush
+      def flush(items)
         result = dyna.batch_write_item write_tables, items
 
         self.flushed_count += items.size
@@ -122,18 +123,27 @@ module Moe
         results
       end
 
-      def key(sequence_id, uid=uuid)
+      def itemize(payload, sequence_id, uid=uuid)
         {
-          "hash"  => owner_id,
-          "range" => "#{sequence_id}.#{uid}"
+          "hash"    => owner_id,
+          "range"   => "#{sequence_id}.#{uid}",
+          "payload" => MultiJson.dump(payload)
         }
       end
 
-      def keyify
+      def key(sequence_id, uid=uuid)
+        {
+          "hash"    => owner_id,
+          "range"   => "#{sequence_id}.#{uid}"
+        }
+      end
+
+      # TODO need to tap and return value so stuff no break
+      def keyify(items, uid=uuid)
         count = flushed_count
         items.each do |item|
           count += 1
-          item.update key count
+          item.update key count, uid
         end
       end
 

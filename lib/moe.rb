@@ -1,4 +1,5 @@
 require "aws-sdk-core"
+require "multi_json"
 require "securerandom"
 
 require "moe/config"

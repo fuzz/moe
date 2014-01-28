@@ -37,15 +37,15 @@ describe Moe::Models::Sequence do
 
   describe "#initialize" do
     it "initializes an item array" do
-      expect( seq.items ).to be_an(Array)
+      expect( seq.payloads ).to be_an(Array)
     end
   end
 
   describe "#add" do
-    it "adds an item to the item array" do
+    it "adds an item to the payloads array" do
       seq.add({ "bar" => "baz" })
 
-      expect( seq.items.first["bar"] ).to eq("baz")
+      expect( seq.payloads.first["bar"] ).to eq("baz")
     end
 
     it "does not flush before it hits the batch limit" do
@@ -108,8 +108,8 @@ describe Moe::Models::Sequence do
       seq.save({ "foo" => "bar" })
 
       expect(
-        seq.get_metadata_items.first.last.first["foo"]
-      ).to eq("bar")
+        MultiJson.load seq.get_metadata_items.first.last.first["payload"]
+      ).to eq({ "foo" => "bar"})
     end
   end
 
