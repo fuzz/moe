@@ -17,18 +17,18 @@ module Moe
                       read_capacity,
                       write_capacity
 
-      update_metadata model,
-                      read_tables << write_tables.first,
-                      write_tables,
-                      read_capacity,
-                      write_capacity
+      metadata = {
+        read_tables:  read_tables << write_tables.first,
+        write_tables: write_tables
+      }
+
+      update_metadata model, metadata
 
       [ read_tables, write_tables ]
     end
 
     def increment(model)
       metadata = load_metadata model
-
       table    = load_table metadata[:write_tables].first
 
       if table[:table_name].include? date
@@ -48,10 +48,7 @@ module Moe
       metadata = dyna.get_item meta_table_names,
                                 { "hash" => { s: munged_model(model) } }
 
-      {
-        read_tables:  Serializers::Commafy.load(metadata["read_tables"]["s"]),
-        write_tables: Serializers::Commafy.load(metadata["write_tables"]["s"])
-      }
+      MultiJson.load metadata["payload"]["s"], symbolize_keys: true
     end
 
     def load_table(table_name)
@@ -77,13 +74,10 @@ module Moe
       "moe_#{ENV['RAILS_ENV']}_#{date}_#{munged_model(model)}".downcase
     end
 
-    def update_metadata(model, read_tables=[], write_tables=[], read_capacity, write_capacity)
+    def update_metadata(model, payload)
       item = { 
-        "hash"           => munged_model(model),
-        "read_tables"    => Serializers::Commafy.dump(read_tables),
-        "write_tables"   => Serializers::Commafy.dump(write_tables),
-        "read_capactity" => read_capacity.to_s,
-        "write_capacity" => write_capacity.to_s,
+        "hash"    => munged_model(model),
+        "payload" => MultiJson.dump(payload)
       }
 
       dyna.put_item meta_table_names, item

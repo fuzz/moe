@@ -68,11 +68,11 @@ describe Moe::TableManager do
 
   describe "#load_metadata" do
     it "loads metadata for a model" do
-      manager.update_metadata "load_metadata_test",
-                              ["load_metadata_test"],
-                              ["load_metadata_test"],
-                              "5",
-                              "10"
+      metadata = { read_tables:  ["load_metadata_test"],
+                   write_tables: ["load_metadata_test"] }
+
+      manager.update_metadata "load_metadata_test", metadata
+
       expect(
         manager.load_metadata("load_metadata_test")[:write_tables].first
       ).to match("load_metadata_test")
@@ -113,17 +113,14 @@ describe Moe::TableManager do
 
   describe "#update_metadata" do
     it "updates the metadata" do
-      manager.update_metadata "testie",
-                              ["testie"],
-                              ["testie"],
-                              "5",
-                              "10"
+      manager.update_metadata "testie", { read_tables:  ["testie"],
+                                          write_tables: ["testie"] }
 
       result = dyna.get_item manager.meta_table_names,
                                    { "hash" => { s: "testie" } }
 
       expect(
-        result["write_tables"]["s"]
+        result["payload"]["s"]
       ).to match("testie")
     end
   end
