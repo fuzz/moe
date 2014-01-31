@@ -4,8 +4,6 @@ module Moe
       attr_accessor :dyna, :flushed_count, :payloads
       attr_reader   :owner_id, :write_tables, :uuid
 
-      BATCH_LIMIT = 15
-
       def initialize(name, owner_id)
         @dyna          = Dyna.new
         @flushed_count = 0
@@ -18,7 +16,7 @@ module Moe
       def add(payload={})
         payloads << payload
 
-        if payloads.size >= BATCH_LIMIT
+        if payloads.size >= Moe.config.batch_limit
           items = keyify payloads
           flush items
 

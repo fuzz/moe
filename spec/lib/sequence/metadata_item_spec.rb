@@ -11,14 +11,14 @@ describe Moe::Sequence::MetadataItem do
 
   describe "#items" do
     it "returns the associated items" do
-      collector.add
-      collector.add
-      collector.add
+      1.upto(1000) do
+        collector.add
+      end
       collector.save
 
       sequences = collection.metadata_items
 
-      expect( sequences.first.items.size ).to eq(3)
+      expect( sequences.first.items.size ).to eq(1000)
     end
   end
 end

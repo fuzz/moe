@@ -36,7 +36,7 @@ module Moe
               results << MetadataItem.new(  table_name,
                                             owner_id,
                                             item["range"].s.gsub(/0\./, ""),
-                                            item["count"].s,
+                                            item["count"].s.to_i,
                              MultiJson.load(item["payload"].s) )
             end
 

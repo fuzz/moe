@@ -11,9 +11,10 @@ module Moe
   extend ModuleFunctions
 
   class Config
-    attr_accessor :tables
+    attr_accessor :batch_limit, :tables
 
     def initialize
+      @batch_limit = 15
       @tables  = {}
     end
   end
