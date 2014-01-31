@@ -11,23 +11,6 @@ module Moe
         @read_tables   = Moe.config.tables[name].first
       end
 
-      def get_items(table_name, uid, count)
-        request = {
-          request_items: {
-            table_name => { keys: [] }
-          }
-        }
-        keys = request[:request_items][table_name][:keys]
-
-        1.upto(count.to_i) do |sequence_id|
-          keys << dyna.explode( Locksmith.key(owner_id, sequence_id, uid) )
-        end
-
-        results = dyna.dynamodb.batch_get_item(request)
-
-        implode_batch results.responses
-      end
-
       def get_metadata_items
         results = []
 
@@ -63,17 +46,6 @@ module Moe
         results
       end
 
-      private
-
-      def implode_batch(batch)
-        results = []
-        batch.each_value do |item|
-          item.each do |i|
-            results << dyna.implode(i)
-          end
-        end
-        results
-      end
     end
   end
 end
