@@ -27,8 +27,12 @@ module Moe
           self.sequence_id += 1
         end
 
-        results = dyna.dynamodb.batch_get_item(request)
+        munge dyna.dynamodb.batch_get_item(request)
+      end
 
+      private
+
+      def munge(results)
         results.responses.each_value do |item|
           item.each do |i|
             items << dyna.implode(i)

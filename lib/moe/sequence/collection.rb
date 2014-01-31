@@ -15,11 +15,7 @@ module Moe
           read_tables.each do |table_name|
 
             dyna.dynamodb.query(request table_name).items.each do |item|
-              results << MetadataItem.new(  table_name,
-                                            owner_id,
-                                            item["range"].s.gsub(/0\./, ""),
-                                            item["count"].s.to_i,
-                             MultiJson.load(item["payload"].s) )
+              results << process(table_name, item)
             end
 
           end
@@ -27,6 +23,14 @@ module Moe
       end
 
       private
+
+      def process(table_name, item)
+        MetadataItem.new( table_name,
+                          owner_id,
+                          item["range"].s.gsub(/0\./, ""),
+                          item["count"].s.to_i,
+           MultiJson.load(item["payload"].s) )
+      end
 
       def request(table_name)
         {
