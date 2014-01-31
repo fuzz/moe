@@ -16,7 +16,7 @@ describe Moe::Sequence::MetadataItem do
       collector.add
       collector.save
 
-      sequences = collection.get_metadata_items
+      sequences = collection.metadata_items
 
       expect( sequences.first.items.size ).to eq(3)
     end

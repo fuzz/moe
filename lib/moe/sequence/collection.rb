@@ -10,7 +10,7 @@ module Moe
         @read_tables  = Moe.config.tables[name].first
       end
 
-      def get_metadata_items
+      def metadata_items
         [].tap do |results|
           read_tables.each do |table_name|
 

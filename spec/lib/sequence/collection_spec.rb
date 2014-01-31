@@ -9,12 +9,12 @@ describe Moe::Sequence::Collection do
   let(:collection) { Moe::Sequence::Collection.new name, "owner" }
   let(:collector)  { Moe::Sequence::Collector.new  name, "owner" }
 
-  describe "#get_metadata_items" do
+  describe "#metadata_items" do
     it "gets all metadata items for a given owner" do
       collector.save({ "foo" => "bar" })
 
       expect(
-        collection.get_metadata_items.first.payload
+        collection.metadata_items.first.payload
       ).to eq({ "foo" => "bar"})
     end
   end
