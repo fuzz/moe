@@ -6,11 +6,11 @@ module Moe
     def initialize
       @date = Time.now.strftime("%F")
       @dyna = Dyna.new
-      @meta = dyna.find(meta_table_names.first) || dyna.create(meta_table_name, 2)
+      @meta = dyna.find(meta_table_names.first) || dyna.create_table(meta_table_name, 2)
     end
 
     def build(model, copies=1, hash_key="hash", range_key=nil, read_capacity=5, write_capacity=10, read_tables=[])
-      write_tables =  dyna.create table_name(model),
+      write_tables =  dyna.create_table table_name(model),
                       copies,
                       hash_key,
                       range_key,

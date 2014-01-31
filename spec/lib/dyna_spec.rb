@@ -8,7 +8,7 @@ describe Moe::Dyna do
   let(:dynamodb)        { Aws.dynamodb }
   let(:item)            { { "hash" => "test#{count}" } }
   let(:dynamo_item)     { dyna.explode(item) }
-  let(:created_tables)  { dyna.create("Testy#{count}") }
+  let(:created_tables)  { dyna.create_table("Testy#{count}") }
   let(:table)           { dyna.find(created_tables.first).table }
 
   describe "#batch_write_item" do
@@ -21,9 +21,9 @@ describe Moe::Dyna do
     end
   end
 
-  describe "#create" do
+  describe "#create_table" do
     it "creates a new table" do
-      new_table = dyna.create "Testy#{count}"
+      new_table = dyna.create_table "Testy#{count}"
 
       expect(
         dynamodb.list_tables.table_names.include? "Testy#{count}_1"
@@ -31,7 +31,7 @@ describe Moe::Dyna do
     end
 
     it "creates as many copies of a table as requested" do
-      new_tables = dyna.create "Testie#{count}", 5
+      new_tables = dyna.create_table "Testie#{count}", 5
 
       expect(
         dynamodb.list_tables.table_names.include? "Testie#{count}_1"
@@ -61,7 +61,7 @@ describe Moe::Dyna do
 
     it "gets an item across multiple tables" do
       dynamodb.put_item table_name: table.table_name, item: dynamo_item
-      empty_table = dyna.create "Testy#{count}_empty"
+      empty_table = dyna.create_table "Testy#{count}_empty"
       result      = dyna.get_item [table.table_name, "Testy#{count}_empty_1"], dynamo_item
 
       expect( result["hash"]["s"] ).to eq("test#{count}")
@@ -78,7 +78,7 @@ describe Moe::Dyna do
 
   describe "#find" do
     it "finds a table" do
-      dyna.create "Testy#{count}"
+      dyna.create_table "Testy#{count}"
 
       expect(
         dyna.find("Testy#{count}_1").table.table_name
@@ -102,7 +102,7 @@ describe Moe::Dyna do
     end
 
     it "puts an item to multiple tables" do
-      mirror_tables = dyna.create "Testie#{count}", 2
+      mirror_tables = dyna.create_table "Testie#{count}", 2
       dyna.put_item ["Testie#{count}_1", "Testie#{count}_2"], item
 
       expect(

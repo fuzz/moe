@@ -17,7 +17,7 @@ module Moe
       end
     end
 
-    def create(name, copies=1, hash_key="hash", range_key=nil, read_capacity=5, write_capacity=10)
+    def create_table(name, copies=1, hash_key="hash", range_key=nil, read_capacity=5, write_capacity=10)
       [].tap do |tables|
         1.upto(copies).each do |copy|
           schema = table_schema "#{name}_#{copy}",
