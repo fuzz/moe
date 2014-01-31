@@ -8,6 +8,7 @@ require "moe/sequence"
 require "moe/sequence/collection"
 require "moe/sequence/collector"
 require "moe/sequence/locksmith"
+require "moe/sequence/metadata_item"
 require "moe/table_manager"
 require "moe/version"
 

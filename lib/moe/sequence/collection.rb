@@ -1,12 +1,12 @@
 module Moe
   module Sequence
     class Collection
-      attr_accessor :dyna, :payloads
+      attr_accessor :dyna, :sequences
       attr_reader   :owner_id, :read_tables, :uuid
 
       def initialize(name, owner_id)
         @dyna          = Dyna.new
-        @payloads      = []
+        @sequences     = []
         @owner_id      = owner_id
         @read_tables   = Moe.config.tables[name].first
       end
@@ -51,10 +51,16 @@ module Moe
             }
           }
 
-          results << { table_name => dyna.dynamodb.query(request).items }
+          dyna.dynamodb.query(request).items.each do |item|
+            results << MetadataItem.new(  table_name,
+                                          owner_id,
+                                          item["range"].s.gsub(/0\./, ""),
+                                          item["count"].s,
+                           MultiJson.load(item["payload"].s) )
+          end
         end
 
-        parse_query_results(results)
+        results
       end
 
       private
@@ -67,26 +73,6 @@ module Moe
           end
         end
         results
-      end
-
-      def parse_query_results(results)
-        parsed_results = {}
-
-        results.each do |table|
-          table.each do |table_name,item|
-            parsed_results[table_name] = []
-            parsed_item = {}
-
-            item.each do |attribute|
-              attribute.each do |name,value|
-                parsed_item[name] = value.s
-              end
-              parsed_results[table_name] << parsed_item
-            end
-          end
-        end
-
-        parsed_results
       end
     end
   end

@@ -18,9 +18,9 @@ describe Moe::Sequence do
 
         metadata = collection.get_metadata_items
 
-        items = collection.get_items metadata.first.first,
-                  metadata.first.last.first["range"].gsub(/0\./, ""),
-                  metadata.first.last.first["count"]
+        items = collection.get_items metadata.first.table_name,
+                                     metadata.first.uid,
+                                     metadata.first.count
 
         expect( items.size ).to eq(2)
       end
@@ -31,7 +31,7 @@ describe Moe::Sequence do
         collector.save({ "foo" => "bar" })
 
         expect(
-          MultiJson.load collection.get_metadata_items.first.last.first["payload"]
+          collection.get_metadata_items.first.payload
         ).to eq({ "foo" => "bar"})
       end
     end
