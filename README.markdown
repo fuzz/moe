@@ -39,8 +39,8 @@ number of different persistence strategies depending on your use cases and
 patterns. Cannot find a pattern that is a good match for your workload? Add
 one!
 
-The first persistence strategy available is the one described at
-http://fuzz.github.io -- it provides a model where an "owner" has many things
+The first persistence strategy available is the one described in
+[DynamoDB Hum](https://pinecab.com/dynamodb-hum/) -- it provides a model where an "owner" has many things
 that each have many things using a single DynamoDB table with no indexes. By
 comparison a more ruby-typical-but-dynamo-naive implementation might use two
 tables plus a GSI at ~3x the cost. Not to mention the additional complexity as
