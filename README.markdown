@@ -17,7 +17,7 @@ across multiple tables).
 Currently mirroring uses a table with the same capacity as the primary table.
 In the future we may add Kinesis support for the mirror table so the mirrored
 writes can go to Kinesis first and then trickle into the mirror table so we can
-minimize the capacity required. This mill also allow us do Big Data type
+minimize the capacity required. This will also allow us do Big Data type
 realtime procesing as it goes through Kinesis should that be desired. 
 
 There are different approaches to splitting based on the use case. The most
